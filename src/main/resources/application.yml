@@ -23,6 +23,18 @@ spring:
       minimum-idle: 5
       # 多久关闭一个空闲连接
       idle-timeout: 30000
+  mail:
+    host: smtp.sina.com
+    port: 465
+    username: xnmk_community@sina.com
+    password: 5ae7175e16070fa4
+    # 启用安全传输协议
+    protocol: smtps
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
 
 mybatis-plus:
   configuration:
@@ -35,5 +47,8 @@ mybatis-plus:
   # 设置xml所在位置
   mapper-locations: classpath:mapper/*.xml
 
-
+# 自定义参数（用于域名设置）
+community:
+  path:
+    domain: http://localhost:8080
 

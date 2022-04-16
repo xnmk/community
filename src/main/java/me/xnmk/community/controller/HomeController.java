@@ -29,6 +29,13 @@ public class HomeController {
     @Autowired
     private DiscussPortService discussPortService;
 
+    /**
+     * 访问主页并将帖子信息返回
+     *
+     * @param model      模板
+     * @param pageParams 分页信息
+     * @return ModelAndView
+     */
     @GetMapping("/index")
     public String getIndexPage(Model model, PageParams pageParams) {
         // SpringMVC会自动实例化Model和PageParams，并将pageParams注入Model.
@@ -37,6 +44,7 @@ public class HomeController {
         pageParams.setPath("/index");
 
         List<DiscussPost> discussPostList = discussPortService.findDiscussPosts(0, pageParams);
+        // 存放用户及帖子信息
         List<Map<String, Object>> discussPosts = new ArrayList<>();
         if (discussPostList != null) {
             for (DiscussPost discussPost : discussPostList) {

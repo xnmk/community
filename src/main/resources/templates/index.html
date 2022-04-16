@@ -11,7 +11,7 @@
 <body>	
 	<div class="nk-container">
 		<!-- 头部 -->
-		<header class="bg-dark sticky-top">
+		<header class="bg-dark sticky-top" th:fragment="header">
 			<div class="container">
 				<!-- 导航 -->
 				<nav class="navbar navbar-expand-lg navbar-dark">
@@ -24,16 +24,16 @@
 					<div class="collapse navbar-collapse" id="navbarSupportedContent">
 						<ul class="navbar-nav mr-auto">
 							<li class="nav-item ml-3 btn-group-vertical">
-								<a class="nav-link" href="index.html">首页</a>
+								<a class="nav-link" th:href="@{/index}">首页</a>
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical">
 								<a class="nav-link position-relative" href="site/letter.html">消息<span class="badge badge-danger">12</span></a>
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical">
-								<a class="nav-link" href="site/register.html">注册</a>
+								<a class="nav-link" th:href="@{/register}">注册</a>
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical">
-								<a class="nav-link" href="site/login.html">登录</a>
+								<a class="nav-link" th:href="@{/login}">登录</a>
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -140,15 +140,24 @@
 					</li>
 				</ul>
 				<!-- 分页 -->
-				<nav class="mt-5" th:if="${page.rows>0}">
-					<ul class="pagination justify-content-center">
-						<li class="page-item"><a class="page-link" th:href="@{${page.path}(current=1)}">首页</a></li>
-						<li class="page-item disabled"><a class="page-link" th:href="@{}">上一页</a></li>
-						<li class="page-item active"><a class="page-link" href="#">1</a></li>
-						<li class="page-item"><a class="page-link" href="#">下一页</a></li>
-						<li class="page-item"><a class="page-link" th:href="@{${page.path}(current=${page.total})}">末页</a></li>
-					</ul>
-				</nav>
+                <nav class="mt-5" th:if="${pageParams.rows>0}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item">
+                            <a class="page-link" th:href="@{${pageParams.path}(current=1)}">首页</a>
+                        </li>
+                        <li th:class="|page-item ${pageParams.current==1?'disabled':''}|">
+                            <a class="page-link" th:href="@{${pageParams.path}(current=${pageParams.current-1})}">上一页</a></li>
+                        <li th:class="|page-item ${i==pageParams.current?'active':''}|" th:each="i:${#numbers.sequence(pageParams.from,pageParams.to)}">
+                            <a class="page-link" href="#" th:text="${i}">1</a>
+                        </li>
+                        <li th:class="|page-item ${pageParams.current==pageParams.total?'disabled':''}|">
+                            <a class="page-link" th:href="@{${pageParams.path}(current=${pageParams.current+1})}">下一页</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" th:href="@{${pageParams.path}(current=${pageParams.total})}">末页</a>
+                        </li>
+                    </ul>
+                </nav>
 			</div>
 		</div>
 

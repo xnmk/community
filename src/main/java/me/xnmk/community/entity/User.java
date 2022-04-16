@@ -1,14 +1,20 @@
 package me.xnmk.community.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+
 import java.util.Date;
 
 /**
  * @author:xnmk_zhan
  * @create:2022-04-14 15:27
- * @Description: 用户
+ * @Description: 用户信息
  */
 public class User {
 
+    @TableId(type = IdType.AUTO)
     private int id;
     private String username;
     private String password;
@@ -18,6 +24,7 @@ public class User {
     private int status;
     private String activationCode;
     private String headerUrl;
+    @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
     public int getId() {
