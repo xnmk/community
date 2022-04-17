@@ -1,9 +1,14 @@
 package me.xnmk.community.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import me.xnmk.community.dao.LoginTicketMapper;
 import me.xnmk.community.dao.UserMapper;
+import me.xnmk.community.entity.LoginTicket;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.ActivationStates;
+import me.xnmk.community.enumeration.TicketStatus;
+import me.xnmk.community.enumeration.UserStatus;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.MailClient;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -28,6 +34,8 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
     @Autowired
     private MailClient mailClient;
     @Autowired
@@ -113,5 +121,58 @@ public class UserServiceImpl implements UserService{
         }else {
             return ActivationStates.ACTIVATION_SUCCESS.getCode();
         }
+    }
+
+    @Override
+    public Map<String, Object> login(String username, String password, int expiredSecond) {
+        Map<String, Object> map = new HashMap<>();
+        // 空值判断
+        if (StringUtils.isBlank(username)) {
+            map.put("usernameMsg", "账号不能为空!");
+            return map;
+        }
+        if (StringUtils.isBlank(password)) {
+            map.put("passwordMsg", "密码不能为空!");
+            return map;
+        }
+
+        // 验证账号
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUsername, username);
+        User user = userMapper.selectOne(queryWrapper);
+        if (user == null){
+            map.put("usernameMsg", "该账号不存在！");
+            return map;
+        }
+
+        // 验证激活状态
+        if (user.getStatus() == UserStatus.USER_UNACTIVATED.getCode()){
+            map.put("usernameMsg", "该账号未激活！");
+            return map;
+        }
+
+        // 验证密码
+        password = CommunityUtil.md5(password + user.getSalt());
+        if (!user.getPassword().equals(password)){
+            map.put("usernameMsg", "密码不正确！");
+            return map;
+        }
+
+        // 生成登录凭证
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(CommunityUtil.generateUUID());
+        loginTicket.setStatus(TicketStatus.TICKET_VALID.getCode());
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSecond * 1000));
+        loginTicketMapper.insert(loginTicket);
+
+        // 返回登录凭证给用户
+        map.put("ticket",loginTicket.getTicket());
+        return map;
+    }
+
+    @Override
+    public void logout(String ticket) {
+        loginTicketMapper.updateStatus(ticket, TicketStatus.TICKET_INVALID.getCode());
     }
 }
