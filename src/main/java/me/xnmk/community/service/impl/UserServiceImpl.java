@@ -175,4 +175,12 @@ public class UserServiceImpl implements UserService{
     public void logout(String ticket) {
         loginTicketMapper.updateStatus(ticket, TicketStatus.TICKET_INVALID.getCode());
     }
+
+    @Override
+    public LoginTicket findLoginTicket(String ticket) {
+        LambdaQueryWrapper<LoginTicket> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(LoginTicket::getTicket, ticket);
+        LoginTicket loginTicket = loginTicketMapper.selectOne(queryWrapper);
+        return loginTicket;
+    }
 }

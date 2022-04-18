@@ -1,5 +1,6 @@
 package me.xnmk.community.service;
 
+import me.xnmk.community.entity.LoginTicket;
 import me.xnmk.community.entity.User;
 
 import java.util.Map;
@@ -47,4 +48,12 @@ public interface UserService {
      * @param ticket 登录凭证
      */
     void logout(String ticket);
+
+    /**
+     * 根据凭证查询凭证信息
+     *
+     * @param ticket 凭证
+     * @return 凭证信息
+     */
+    LoginTicket findLoginTicket(String ticket);
 }
