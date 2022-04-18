@@ -1,5 +1,6 @@
 package me.xnmk.community.controller;
 
+import me.xnmk.community.annotation.LoginRequired;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
@@ -50,18 +51,20 @@ public class UserController {
      *
      * @return 路径
      */
+    @LoginRequired
     @GetMapping("/setting")
     public String getSettingPage() {
         return "/site/setting";
     }
 
     /**
-     * 上传图片到本地存储
+     * 上传头像到本地存储
      *
      * @param headerImage 图片
      * @param model       模板
      * @return ModelAndView or 首页路径
      */
+    @LoginRequired
     @PostMapping("/upload")
     public String uploadHeader(MultipartFile headerImage, Model model) {
         // 检查上传文件是否为空
@@ -97,7 +100,7 @@ public class UserController {
     }
 
     /**
-     * 查询图片
+     * 获取头像
      *
      * @param fileName 图片名称
      * @param response 响应
@@ -133,6 +136,7 @@ public class UserController {
      * @param model            模板
      * @return 重定向 or ModelAndView
      */
+    // @LoginRequired
     @PostMapping("/password/modify")
     public String modifyPassword(@CookieValue("ticket") String ticket, String originalPassword, String newPassword, Model model) {
         Map<String, Object> map = userService.modifyPassword(originalPassword, newPassword);

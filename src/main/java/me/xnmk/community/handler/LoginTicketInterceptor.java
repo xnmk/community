@@ -17,7 +17,7 @@ import java.util.Date;
 /**
  * @author:xnmk_zhan
  * @create:2022-04-18 09:36
- * @Description: 登录拦截器
+ * @Description: 使用拦截器在每次请求前根据登录凭证获得用户信息
  */
 @Component
 public class LoginTicketInterceptor implements HandlerInterceptor {
