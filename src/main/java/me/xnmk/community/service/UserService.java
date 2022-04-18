@@ -56,4 +56,22 @@ public interface UserService {
      * @return 凭证信息
      */
     LoginTicket findLoginTicket(String ticket);
+
+    /**
+     * 更新头像路径
+     *
+     * @param userId    用户id
+     * @param headerUrl 头像路径
+     * @return int
+     */
+    int updateHeader(int userId, String headerUrl);
+
+    /**
+     * 修改密码
+     *
+     * @param originalPassword 原密码
+     * @param newPassword      新密码
+     * @return 提示信息
+     */
+    Map<String, Object> modifyPassword(String originalPassword, String newPassword);
 }

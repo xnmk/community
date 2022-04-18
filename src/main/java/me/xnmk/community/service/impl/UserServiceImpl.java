@@ -12,6 +12,7 @@ import me.xnmk.community.enumeration.UserStatus;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.MailClient;
+import me.xnmk.community.util.UserThreadLocal;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,8 @@ public class UserServiceImpl implements UserService{
     private MailClient mailClient;
     @Autowired
     private TemplateEngine templateEngine;
+    @Autowired
+    private UserThreadLocal userThreadLocal;
 
     @Value("${community.path.domain}")
     private String domain;
@@ -182,5 +185,41 @@ public class UserServiceImpl implements UserService{
         queryWrapper.eq(LoginTicket::getTicket, ticket);
         LoginTicket loginTicket = loginTicketMapper.selectOne(queryWrapper);
         return loginTicket;
+    }
+
+    @Override
+    public int updateHeader(int userId, String headerUrl) {
+        User user = new User();
+        user.setHeaderUrl(headerUrl);
+        user.setId(userId);
+        return userMapper.updateById(user);
+    }
+
+    @Override
+    public Map<String, Object> modifyPassword(String originalPassword, String newPassword) {
+        Map<String, Object> map = new HashMap<>();
+        // 空值判断
+        if (StringUtils.isBlank(originalPassword)){
+            map.put("oriPasswordMsg", "原密码不能为空！");
+            return map;
+        }
+        if (StringUtils.isBlank(newPassword)){
+            map.put("newPasswordMsg", "新密码不能为空！");
+            return map;
+        }
+
+        // 原密码是否正确
+        User user = userThreadLocal.getUser();
+        originalPassword = CommunityUtil.md5(originalPassword + user.getSalt());
+        if (!originalPassword.equals(user.getPassword())){
+            // 不正确：返回提示信息
+            map.put("oriPasswordMsg", "原密码不正确！");
+            return map;
+        }else {
+            // 正确：更改密码
+            newPassword = CommunityUtil.md5(newPassword + user.getSalt());
+            userMapper.updatePasswordById(newPassword, user.getId());
+            return map;
+        }
     }
 }

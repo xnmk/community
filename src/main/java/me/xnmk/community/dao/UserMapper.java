@@ -9,4 +9,5 @@ import org.springframework.stereotype.Component;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
+    void updatePasswordById(String newPassword, int userId);
 }

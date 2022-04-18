@@ -47,8 +47,9 @@ mybatis-plus:
   # 设置xml所在位置
   mapper-locations: classpath:mapper/*.xml
 
-# 自定义参数（用于域名设置）
+# 自定义参数
 community:
   path:
     domain: http://localhost:8080
+    upload: d:/workSpace/data/upload
 
