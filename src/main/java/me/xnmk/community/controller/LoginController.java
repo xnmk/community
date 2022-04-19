@@ -5,6 +5,8 @@ import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.ActivationStates;
 import me.xnmk.community.enumeration.TicketTtl;
 import me.xnmk.community.service.UserService;
+import me.xnmk.community.util.CommunityUtil;
+import me.xnmk.community.util.MailClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
@@ -41,6 +45,10 @@ public class LoginController {
     private UserService userService;
     @Autowired
     private Producer kaptchaProducer;
+    @Autowired
+    private MailClient mailClient;
+    @Autowired
+    private TemplateEngine templateEngine;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
@@ -63,6 +71,16 @@ public class LoginController {
     @GetMapping("/login")
     public String getLoginPage() {
         return "/site/login";
+    }
+
+    /**
+     * 跳转至忘记密码页面
+     *
+     * @return 路径
+     */
+    @GetMapping("/forget")
+    public String getForgetPage() {
+        return "/site/forget";
     }
 
     /**
@@ -189,5 +207,35 @@ public class LoginController {
     public String logout(@CookieValue("ticket") String ticket) {
         userService.logout(ticket);
         return "redirect:/login";
+    }
+
+    /**
+     * 暂未完成
+     * @param email
+     * @param session
+     * @param model
+     * @return
+     */
+    @GetMapping("/forget/code")
+    public String getForgetCode(String email, HttpSession session, Model model){
+        // 检查邮箱是否为空
+        if (StringUtils.isBlank(email)){
+            model.addAttribute("emailMsg", "邮箱不能为空！");
+            return "/site/forget";
+        }
+
+        // 发送邮箱
+        Context context = new Context();
+        context.setVariable("email", email);
+        String code = CommunityUtil.generateUUID().substring(0, 4);
+        context.setVariable("verifyCode", code);
+        String content = templateEngine.process("/mail/forget", context);
+        mailClient.sendMail(email, "找回密码", content);
+
+        // 保存验证码
+        session.setAttribute("verifyCode", code);
+
+        model.addAttribute("email", email);
+        return "/site/forget";
     }
 }
