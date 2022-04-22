@@ -51,7 +51,7 @@ public class DiscussPortServiceImpl implements DiscussPortService {
     }
 
     @Override
-    public int addDiscussPost(DiscussPost discussPost){
+    public int addDiscussPost(DiscussPost discussPost) {
         // 判空
         if (discussPost == null) throw new IllegalArgumentException("参数不能为空！");
 
@@ -63,5 +63,10 @@ public class DiscussPortServiceImpl implements DiscussPortService {
         discussPost.setContent(sensitiveFilter.filter(content));
 
         return discussPostMapper.insert(discussPost);
+    }
+
+    @Override
+    public DiscussPost findDiscussPostById(int id) {
+        return discussPostMapper.selectById(id);
     }
 }

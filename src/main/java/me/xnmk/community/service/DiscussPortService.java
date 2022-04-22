@@ -31,4 +31,12 @@ public interface DiscussPortService {
      * @return 是否添加成功
      */
     int addDiscussPost(DiscussPost discussPost);
+
+    /**
+     * 根据帖子id查找帖子信息
+     *
+     * @param id 帖子id
+     * @return DiscussPost
+     */
+    DiscussPost findDiscussPostById(int id);
 }
