@@ -1,13 +1,16 @@
 package me.xnmk.community.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import me.xnmk.community.dao.DiscussPostMapper;
 import me.xnmk.community.entity.DiscussPost;
 import me.xnmk.community.service.DiscussPortService;
+import me.xnmk.community.util.SensitiveFilter;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -21,6 +24,8 @@ public class DiscussPortServiceImpl implements DiscussPortService {
 
     @Autowired
     private DiscussPostMapper discussPostMapper;
+    @Autowired
+    private SensitiveFilter sensitiveFilter;
 
     @Override
     public List<DiscussPost> findDiscussPosts(int userId, PageParams pageParams) {
@@ -43,5 +48,20 @@ public class DiscussPortServiceImpl implements DiscussPortService {
     @Override
     public int findDiscussPortRows(int userId) {
         return discussPostMapper.selectDiscussPostRows(userId);
+    }
+
+    @Override
+    public int addDiscussPost(DiscussPost discussPost){
+        // 判空
+        if (discussPost == null) throw new IllegalArgumentException("参数不能为空！");
+
+        // 转义
+        String title = HtmlUtils.htmlEscape(discussPost.getTitle());
+        String content = HtmlUtils.htmlEscape(discussPost.getContent());
+        // 过滤敏感词
+        discussPost.setTitle(sensitiveFilter.filter(title));
+        discussPost.setContent(sensitiveFilter.filter(content));
+
+        return discussPostMapper.insert(discussPost);
     }
 }

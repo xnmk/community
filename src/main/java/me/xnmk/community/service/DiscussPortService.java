@@ -23,4 +23,12 @@ public interface DiscussPortService {
      * @return rows
      */
     int findDiscussPortRows(int userId);
+
+    /**
+     * 添加帖子
+     *
+     * @param discussPost 帖子信息
+     * @return 是否添加成功
+     */
+    int addDiscussPost(DiscussPost discussPost);
 }

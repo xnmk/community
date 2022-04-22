@@ -1,5 +1,10 @@
 package me.xnmk.community.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+
 import java.util.Date;
 
 /**
@@ -9,12 +14,14 @@ import java.util.Date;
  */
 public class DiscussPost {
 
+    @TableId(type = IdType.AUTO)
     private int id;
     private int userId;
     private String title;
     private String content;
     private int type;
     private int status;
+    @TableField(fill = FieldFill.INSERT)
     private Date createTime;
     private int commentCount;
     private double score;
