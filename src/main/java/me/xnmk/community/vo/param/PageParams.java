@@ -13,11 +13,15 @@ public class PageParams {
     // 显示上限
     private int limit = 10;
 
+    // 页的起始行
+    // private int offset = 0;
+
     // 数据总数
     private int rows;
 
     // 查询路径（用于复用分页路径）
     private String path;
+
 
     public PageParams() {
     }
@@ -96,5 +100,13 @@ public class PageParams {
         int to = current + 2;
         int total = getTotal();
         return to > total ? total : to;
+    }
+
+    /**
+     * 获得页的起始行
+     * @return int
+     */
+    public int getOffset() {
+        return (current - 1) * limit;
     }
 }

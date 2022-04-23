@@ -2,7 +2,7 @@ package me.xnmk.community.controller;
 
 import me.xnmk.community.entity.DiscussPost;
 import me.xnmk.community.entity.User;
-import me.xnmk.community.service.DiscussPortService;
+import me.xnmk.community.service.DiscussPostService;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class HomeController {
     private UserService userService;
 
     @Autowired
-    private DiscussPortService discussPortService;
+    private DiscussPostService discussPostService;
 
     /**
      * 访问主页并将帖子信息返回
@@ -40,10 +40,10 @@ public class HomeController {
     public String getIndexPage(Model model, PageParams pageParams) {
         // SpringMVC会自动实例化Model和PageParams，并将pageParams注入Model.
         // 所以，在thymeleaf种可以直接访问PageParams对象种的数据
-        pageParams.setRows(discussPortService.findDiscussPortRows(0));
+        pageParams.setRows(discussPostService.findDiscussPortRows(0));
         pageParams.setPath("/index");
 
-        List<DiscussPost> discussPostList = discussPortService.findDiscussPosts(0, pageParams);
+        List<DiscussPost> discussPostList = discussPostService.findDiscussPosts(0, pageParams);
         // 存放用户及帖子信息
         List<Map<String, Object>> discussPosts = new ArrayList<>();
         if (discussPostList != null) {

@@ -14,8 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
  * @create:2022-04-14 19:48
  * @Description: DiscussPostMapper测试
  */
-    @SpringBootTest
-    @ContextConfiguration(classes = CommunityApplication.class)
+@SpringBootTest
+@ContextConfiguration(classes = CommunityApplication.class)
 public class DiscussPortTests {
 
     @Autowired

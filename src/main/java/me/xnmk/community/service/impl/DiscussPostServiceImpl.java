@@ -1,11 +1,10 @@
 package me.xnmk.community.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import me.xnmk.community.dao.DiscussPostMapper;
 import me.xnmk.community.entity.DiscussPost;
-import me.xnmk.community.service.DiscussPortService;
+import me.xnmk.community.service.DiscussPostService;
 import me.xnmk.community.util.SensitiveFilter;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import java.util.List;
  * @Description: DiscussPortService接口实现
  */
 @Service
-public class DiscussPortServiceImpl implements DiscussPortService {
+public class DiscussPostServiceImpl implements DiscussPostService {
 
     @Autowired
     private DiscussPostMapper discussPostMapper;

@@ -5,7 +5,7 @@ import me.xnmk.community.vo.param.PageParams;
 
 import java.util.List;
 
-public interface DiscussPortService {
+public interface DiscussPostService {
 
     /**
      * 根据用户Id查找帖子（分页）
