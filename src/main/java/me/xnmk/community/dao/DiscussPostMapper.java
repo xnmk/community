@@ -10,4 +10,6 @@ import org.springframework.stereotype.Component;
 public interface DiscussPostMapper extends BaseMapper<DiscussPost> {
 
     int selectDiscussPostRows(int userId);
+
+    int updateCommentCount(int id, int commentCount);
 }

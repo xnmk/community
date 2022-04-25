@@ -39,4 +39,13 @@ public interface DiscussPostService {
      * @return DiscussPost
      */
     DiscussPost findDiscussPostById(int id);
+
+    /**
+     * 更新帖子评论数
+     *
+     * @param discussPostId 帖子id
+     * @param commentCount  帖子评论数
+     * @return int 是否添加成功
+     */
+    int updateCommentCount(int discussPostId, int commentCount);
 }

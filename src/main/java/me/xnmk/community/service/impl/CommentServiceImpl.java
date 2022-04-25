@@ -3,17 +3,25 @@ package me.xnmk.community.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import me.xnmk.community.dao.CommentMapper;
+import me.xnmk.community.dao.DiscussPostMapper;
 import me.xnmk.community.entity.Comment;
+import me.xnmk.community.entity.DiscussPost;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.CommentTypes;
 import me.xnmk.community.service.CommentService;
+import me.xnmk.community.service.DiscussPostService;
 import me.xnmk.community.service.UserService;
+import me.xnmk.community.util.SensitiveFilter;
 import me.xnmk.community.vo.CommentVo;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +37,11 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentMapper commentMapper;
     @Autowired
+    private DiscussPostService discussPostService;
+    @Autowired
     private UserService userService;
+    @Autowired
+    private SensitiveFilter sensitiveFilter;
 
     @Override
     public List<Comment> findCommentsByEntity(int entityType, int entityId, PageParams pageParams) {
@@ -66,15 +78,35 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.selectCountByEntity(entityType, entityId);
     }
 
-    private List<CommentVo> copyList(List<Comment> commentList){
+    // 添加事务
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    public int addComment(Comment comment) {
+        // 空值判断
+        if (comment == null) throw new IllegalArgumentException("参数不能为空");
+        // 过滤
+        comment.setContent(HtmlUtils.htmlEscape(comment.getContent()));
+        comment.setContent(sensitiveFilter.filter(comment.getContent()));
+        // 添加评论
+        int rows = commentMapper.insert(comment);
+        // 更新帖子评论数
+        if (comment.getEntityType() == CommentTypes.ENTITY_TYPE_POST.getCode()) {
+            int count = commentMapper.selectCountByEntity(comment.getEntityType(), comment.getEntityId());
+            discussPostService.updateCommentCount(comment.getEntityId(), count);
+        }
+
+        return rows;
+    }
+
+    private List<CommentVo> copyList(List<Comment> commentList) {
         List<CommentVo> commentVoList = new ArrayList<>();
-        for (Comment comment : commentList){
+        for (Comment comment : commentList) {
             commentVoList.add(copy(comment));
         }
         return commentVoList;
     }
 
-    private CommentVo copy(Comment comment){
+    private CommentVo copy(Comment comment) {
         CommentVo commentVo = new CommentVo();
         BeanUtils.copyProperties(comment, commentVo);
         // 设置用户
@@ -88,8 +120,8 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> replyList = findCommentsByEntity(
                 CommentTypes.ENTITY_TYPE_COMMENT.getCode(), comment.getId(), pageParams);
         // 将得到的replyList转为replyVoList
-        if (replyList != null){
-            for (Comment reply : replyList){
+        if (replyList != null) {
+            for (Comment reply : replyList) {
                 CommentVo replyVo = new CommentVo();
                 BeanUtils.copyProperties(reply, replyVo);
                 // 回复者

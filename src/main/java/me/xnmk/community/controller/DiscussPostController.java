@@ -36,6 +36,13 @@ public class DiscussPostController {
     @Autowired
     private UserThreadLocal userThreadLocal;
 
+    /**
+     * 添加帖子
+     *
+     * @param title 标题
+     * @param content 内容
+     * @return json(code, description)
+     */
     @PostMapping("/add")
     @ResponseBody
     public String addDiscussPost(String title, String content) {
@@ -52,6 +59,14 @@ public class DiscussPostController {
         return CommunityUtil.getJsonString(200, "发布成功！");
     }
 
+    /**
+     * 帖子信息
+     *
+     * @param discussPortId 帖子id
+     * @param model 模板
+     * @param pageParams 分页参数
+     * @return ModelAndView
+     */
     @GetMapping("/detail/{discussPostId}")
     public String getDiscussPost(@PathVariable("discussPostId") int discussPortId, Model model, PageParams pageParams) {
         // 帖子
