@@ -5,14 +5,17 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import me.xnmk.community.dao.MessageMapper;
 import me.xnmk.community.entity.Message;
 import me.xnmk.community.entity.User;
+import me.xnmk.community.enumeration.MessageStatus;
 import me.xnmk.community.service.MessageService;
 import me.xnmk.community.service.UserService;
+import me.xnmk.community.util.SensitiveFilter;
 import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.MessageVo;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,8 @@ public class MessageServiceImpl implements MessageService {
     private UserService userService;
     @Autowired
     private UserThreadLocal userThreadLocal;
+    @Autowired
+    private SensitiveFilter sensitiveFilter;
 
     @Override
     public List<MessageVo> findConversations(int userId, PageParams pageParams) {
@@ -68,6 +73,26 @@ public class MessageServiceImpl implements MessageService {
         return messageMapper.selectLetterUnreadCount(userId, conversationId);
     }
 
+    @Override
+    public int addMessage(Message message) {
+        // 过滤
+        message.setContent(HtmlUtils.htmlEscape(message.getContent()));
+        message.setContent(sensitiveFilter.filter(message.getContent()));
+        return messageMapper.insert(message);
+    }
+
+    @Override
+    public int readMessage(List<Integer> ids) {
+        return messageMapper.updateStatus(ids, MessageStatus.MESSAGE_READ.getCode());
+    }
+
+    @Override
+    public int deleteMessage(int MessageId) {
+        List<Integer> list = new ArrayList<>();
+        list.add(MessageId);
+        return messageMapper.updateStatus(list, MessageStatus.MESSAGE_DELETE.getCode());
+    }
+
     /**
      * @param messageList    会话、私信列表
      * @param isConversation 是否为会话
@@ -82,7 +107,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     /**
-     * @param message 会话、私信
+     * @param message        会话、私信
      * @param isConversation 是否为会话
      * @return MessageVo
      */

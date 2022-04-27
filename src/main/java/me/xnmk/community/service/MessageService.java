@@ -1,5 +1,6 @@
 package me.xnmk.community.service;
 
+import me.xnmk.community.entity.Message;
 import me.xnmk.community.vo.MessageVo;
 import me.xnmk.community.vo.param.PageParams;
 
@@ -54,4 +55,28 @@ public interface MessageService {
      * @return int
      */
     int findLetterUnreadCount(int userId, String conversationId);
+
+    /**
+     * 发送私信
+     *
+     * @param message 私信实体
+     * @return int
+     */
+    int addMessage(Message message);
+
+    /**
+     * 私信已读
+     *
+     * @param ids 未读私信列表
+     * @return it
+     */
+    int readMessage(List<Integer> ids);
+
+    /**
+     * 根据消息id删除消息
+     *
+     * @param MessageId 消息id
+     * @return int
+     */
+    int deleteMessage(int MessageId);
 }

@@ -50,4 +50,13 @@ public interface MessageMapper extends BaseMapper<Message> {
      * @return int
      */
     int selectLetterUnreadCount(int userId, String conversationId);
+
+    /**
+     * 更新消息状态
+     *
+     * @param ids    消息列表
+     * @param status 更新的消息状态
+     * @return int
+     */
+    int updateStatus(List<Integer> ids, int status);
 }

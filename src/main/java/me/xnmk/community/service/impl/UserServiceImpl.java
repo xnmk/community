@@ -55,6 +55,13 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public User findUserByName(String name) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUsername, name);
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
     public Map<String, Object> register(User user) {
         Map<String, Object> map = new HashMap<>();
         // 空值判断（用户对象、账号、密码、邮箱）

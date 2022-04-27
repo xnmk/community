@@ -16,6 +16,14 @@ public interface UserService {
     User findUserById(int id);
 
     /**
+     * 根据用户名查找用户
+     *
+     * @param name 用户名
+     * @return me.xnmk.community.entity.User
+     */
+    User findUserByName(String name);
+
+    /**
      * 注册用户，返回提示信息
      *
      * @param user 携带注册用户的信息

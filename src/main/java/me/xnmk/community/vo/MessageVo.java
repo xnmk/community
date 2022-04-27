@@ -18,6 +18,7 @@ public class MessageVo {
     private String conversationId;
     private String content;
     private Date createTime;
+    private int status;
     // 会话内消息数量
     private int letterCount;
     // 会话内未读消息数量
@@ -106,5 +107,13 @@ public class MessageVo {
 
     public void setFromUser(User fromUser) {
         this.fromUser = fromUser;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }
