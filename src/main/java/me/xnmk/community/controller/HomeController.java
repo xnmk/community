@@ -58,4 +58,14 @@ public class HomeController {
         model.addAttribute("discussPosts", discussPosts);
         return "/index";
     }
+
+    /**
+     * 跳转至错误界面
+     *
+     * @return ModelAndView
+     */
+    @GetMapping("/error")
+    public String getErrorPage() {
+        return "/error/500";
+    }
 }

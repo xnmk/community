@@ -112,6 +112,7 @@ public class MessageController {
     @PostMapping("/letter/send")
     @ResponseBody
     public String sendLetter(String toName, String content) {
+        // Integer.valueOf("abc");
         User toUser = userService.findUserByName(toName);
         if (toName == null) {
             return CommunityUtil.getJsonString(1, "目标用户不存在");
@@ -131,9 +132,15 @@ public class MessageController {
         return CommunityUtil.getJsonString(0);
     }
 
+    /**
+     * 删除私信
+     *
+     * @param id 私信id
+     * @return ajax
+     */
     @PostMapping("/letter/delete")
     @ResponseBody
-    public String deleteLetter(int id){
+    public String deleteLetter(int id) {
         messageService.deleteMessage(id);
         return CommunityUtil.getJsonString(0);
     }
