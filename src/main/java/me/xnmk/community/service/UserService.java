@@ -82,4 +82,13 @@ public interface UserService {
      * @return 提示信息
      */
     Map<String, Object> modifyPassword(String originalPassword, String newPassword);
+
+    /**
+     * 重置密码（忘记密码）
+     *
+     * @param email    邮箱
+     * @param password 密码
+     * @return 提示信息
+     */
+    Map<String, Object> resetPassword(String email, String password);
 }

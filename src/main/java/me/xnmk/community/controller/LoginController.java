@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -210,18 +207,18 @@ public class LoginController {
     }
 
     /**
-     * 暂未完成
-     * @param email
-     * @param session
-     * @param model
-     * @return
+     * 获得修改密码验证码
+     *
+     * @param email   邮箱
+     * @param session 会话
+     * @return ajax
      */
     @GetMapping("/forget/code")
-    public String getForgetCode(String email, HttpSession session, Model model){
+    @ResponseBody
+    public String getForgetCode(String email, HttpSession session) {
         // 检查邮箱是否为空
-        if (StringUtils.isBlank(email)){
-            model.addAttribute("emailMsg", "邮箱不能为空！");
-            return "/site/forget";
+        if (StringUtils.isBlank(email)) {
+            return CommunityUtil.getJsonString(1, "邮箱不能为空！");
         }
 
         // 发送邮箱
@@ -235,7 +232,35 @@ public class LoginController {
         // 保存验证码
         session.setAttribute("verifyCode", code);
 
-        model.addAttribute("email", email);
-        return "/site/forget";
+        return CommunityUtil.getJsonString(0, "验证码成功发送");
+    }
+
+    /**
+     * 重置密码
+     *
+     * @param email      邮箱
+     * @param verifyCode 验证码
+     * @param password   新密码
+     * @param session    会话
+     * @param model      模板
+     * @return ModelAndView
+     */
+    @PostMapping("/forget/password")
+    public String resetPassword(String email, String verifyCode, String password, HttpSession session, Model model) {
+        // 检查验证码
+        String code = (String) session.getAttribute("verifyCode");
+        if (StringUtils.isBlank(verifyCode) || StringUtils.isBlank(code) || !code.equalsIgnoreCase(verifyCode)) {
+            model.addAttribute("codeMsg", "验证码错误!");
+            return "/site/forget";
+        }
+        // 重置密码
+        Map<String, Object> map = userService.resetPassword(email, password);
+        if (map.containsKey("user")) {
+            return "redirect:/login";
+        } else {
+            model.addAttribute("emailMsg", map.get("emailMsg"));
+            model.addAttribute("passwordMsg", map.get("passwordMsg"));
+            return "/site/forget";
+        }
     }
 }
