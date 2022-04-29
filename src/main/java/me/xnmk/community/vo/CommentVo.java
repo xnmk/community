@@ -22,6 +22,10 @@ public class CommentVo {
     private String content;
     private int status;
     private Date createTime;
+    // 点赞数量
+    private long likeCount;
+    // 点赞状态
+    private int likeStatus;
 
     // 评论者
     private User user;
@@ -129,6 +133,22 @@ public class CommentVo {
 
     public void setReplyCount(int replyCount) {
         this.replyCount = replyCount;
+    }
+
+    public long getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(long likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public int getLikeStatus() {
+        return likeStatus;
+    }
+
+    public void setLikeStatus(int likeStatus) {
+        this.likeStatus = likeStatus;
     }
 
     @Override

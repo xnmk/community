@@ -36,6 +36,12 @@ spring:
           ssl:
             enable: true
 
+  redis:
+    host: localhost
+    port: 6379
+    database: 1
+    connect-timeout: 1800000
+
 mybatis-plus:
   configuration:
     # 配置日志 log-impl：日志实现

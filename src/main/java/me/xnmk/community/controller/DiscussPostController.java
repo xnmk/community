@@ -4,8 +4,10 @@ import me.xnmk.community.entity.Comment;
 import me.xnmk.community.entity.DiscussPost;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.CommentTypes;
+import me.xnmk.community.enumeration.EntityTypes;
 import me.xnmk.community.service.CommentService;
 import me.xnmk.community.service.DiscussPostService;
+import me.xnmk.community.service.LikeService;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.UserThreadLocal;
@@ -34,12 +36,14 @@ public class DiscussPostController {
     @Autowired
     private CommentService commentService;
     @Autowired
+    private LikeService likeService;
+    @Autowired
     private UserThreadLocal userThreadLocal;
 
     /**
      * 添加帖子
      *
-     * @param title 标题
+     * @param title   标题
      * @param content 内容
      * @return json(code, description)
      */
@@ -63,18 +67,25 @@ public class DiscussPostController {
      * 帖子信息
      *
      * @param discussPortId 帖子id
-     * @param model 模板
-     * @param pageParams 分页参数
+     * @param model         模板
+     * @param pageParams    分页参数
      * @return ModelAndView
      */
     @GetMapping("/detail/{discussPostId}")
     public String getDiscussPost(@PathVariable("discussPostId") int discussPortId, Model model, PageParams pageParams) {
+        User user = userThreadLocal.getUser();
         // 帖子
         DiscussPost discussPost = discussPostService.findDiscussPostById(discussPortId);
         model.addAttribute("post", discussPost);
         // 作者
-        User user = userService.findUserById(discussPost.getUserId());
-        model.addAttribute("user", user);
+        User author = userService.findUserById(discussPost.getUserId());
+        model.addAttribute("user", author);
+        // 点赞数量
+        long likeCount = likeService.findEntityLikeCount(EntityTypes.ENTITY_TYPE_POST.getCode(), discussPortId);
+        model.addAttribute("likeCount", likeCount);
+        // 点赞状态
+        int likeStatus = user == null ? 0 : likeService.findEntityLikeStatus(user.getId(), EntityTypes.ENTITY_TYPE_POST.getCode(), discussPost.getId());
+        model.addAttribute("likeStatus", likeStatus);
         // 评论
         pageParams.setLimit(5);
         pageParams.setPath("/discuss/detail/" + discussPortId);

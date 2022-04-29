@@ -8,10 +8,13 @@ import me.xnmk.community.entity.Comment;
 import me.xnmk.community.entity.DiscussPost;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.CommentTypes;
+import me.xnmk.community.enumeration.EntityTypes;
 import me.xnmk.community.service.CommentService;
 import me.xnmk.community.service.DiscussPostService;
+import me.xnmk.community.service.LikeService;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.SensitiveFilter;
+import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.CommentVo;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.BeanUtils;
@@ -41,7 +44,11 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private UserService userService;
     @Autowired
+    private LikeService likeService;
+    @Autowired
     private SensitiveFilter sensitiveFilter;
+    @Autowired
+    private UserThreadLocal userThreadLocal;
 
     @Override
     public List<Comment> findCommentsByEntity(int entityType, int entityId, PageParams pageParams) {
@@ -107,11 +114,17 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private CommentVo copy(Comment comment) {
+        User user = userThreadLocal.getUser();
+
         CommentVo commentVo = new CommentVo();
         BeanUtils.copyProperties(comment, commentVo);
         // 设置用户
         commentVo.setUser(userService.findUserById(comment.getUserId()));
-
+        // 点赞数量
+        commentVo.setLikeCount(likeService.findEntityLikeCount(EntityTypes.ENTITY_TYPE_COMMENT.getCode(), comment.getId()));
+        // 点赞状态
+        int likeStatus = user == null ? 0 : likeService.findEntityLikeStatus(user.getId(), EntityTypes.ENTITY_TYPE_COMMENT.getCode(), comment.getId());
+        commentVo.setLikeStatus(likeStatus);
         // 回复列表
         List<CommentVo> replyVoList = new ArrayList<>();
         PageParams pageParams = new PageParams();
@@ -130,6 +143,11 @@ public class CommentServiceImpl implements CommentService {
                 User targetUser = reply.getTargetId() == 0 ? null : userService.findUserById(reply.getTargetId());
                 replyVo.setTargetUser(targetUser);
                 replyVoList.add(replyVo);
+                // 回复内点赞数量
+                replyVo.setLikeCount(likeService.findEntityLikeCount(EntityTypes.ENTITY_TYPE_COMMENT.getCode(), reply.getId()));
+                // 回复内点赞状态
+                int replyLikeStatus = user == null ? 0 : likeService.findEntityLikeStatus(user.getId(), EntityTypes.ENTITY_TYPE_COMMENT.getCode(), reply.getId());
+                replyVo.setLikeStatus(replyLikeStatus);
             }
         }
         commentVo.setReplyVoList(replyVoList);

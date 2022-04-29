@@ -2,6 +2,7 @@ package me.xnmk.community.controller;
 
 import me.xnmk.community.annotation.LoginRequired;
 import me.xnmk.community.entity.User;
+import me.xnmk.community.service.LikeService;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.UserThreadLocal;
@@ -36,6 +37,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private LikeService likeService;
     @Autowired
     private UserThreadLocal userThreadLocal;
 
@@ -153,5 +156,20 @@ public class UserController {
             userService.logout(ticket);
             return "redirect:/login";
         }
+    }
+
+    @GetMapping("/profile/{userId}")
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在");
+        }
+        // 用户
+        model.addAttribute("user", user);
+        // 点赞数量
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+
+        return "/site/profile";
     }
 }

@@ -2,7 +2,10 @@ package me.xnmk.community.controller;
 
 import me.xnmk.community.entity.DiscussPost;
 import me.xnmk.community.entity.User;
+import me.xnmk.community.enumeration.CommentTypes;
+import me.xnmk.community.enumeration.EntityTypes;
 import me.xnmk.community.service.DiscussPostService;
+import me.xnmk.community.service.LikeService;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,8 @@ public class HomeController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private LikeService likeService;
 
     @Autowired
     private DiscussPostService discussPostService;
@@ -52,6 +57,8 @@ public class HomeController {
                 map.put("post", discussPost);
                 User user = userService.findUserById(discussPost.getUserId());
                 map.put("user", user);
+                long likeCount = likeService.findEntityLikeCount(EntityTypes.ENTITY_TYPE_POST.getCode(), discussPost.getId());
+                map.put("likeCount", likeCount);
                 discussPosts.add(map);
             }
         }

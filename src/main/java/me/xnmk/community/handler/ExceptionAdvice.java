@@ -17,12 +17,12 @@ import java.io.PrintWriter;
  * @create:2022-04-27 15:55
  * @Description: Controller增强器，用于统一处理异常
  */
-@ControllerAdvice(annotations = Controller.class)
+// @ControllerAdvice(annotations = Controller.class)
 public class ExceptionAdvice {
 
     private static final Logger logger = LoggerFactory.getLogger(ExceptionAdvice.class);
 
-    @ExceptionHandler({Exception.class})
+    // @ExceptionHandler({Exception.class})
     public void handlerException(Exception e, HttpServletRequest request, HttpServletResponse response) throws IOException {
         for (StackTraceElement element : e.getStackTrace()) {
             logger.error(element.toString());

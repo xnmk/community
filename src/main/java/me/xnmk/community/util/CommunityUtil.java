@@ -57,6 +57,18 @@ public class CommunityUtil {
         return jsonObject.toJSONString();
     }
 
+    // public static String getJsonString(int code, String msg, Object object) {
+    //     JSONObject jsonObject = new JSONObject();
+    //     jsonObject.put("code", code);
+    //     jsonObject.put("msg", msg);
+    //     if (object != null) {
+    //         for (String key : map.keySet()) {
+    //             jsonObject.put(key, map.get(key));
+    //         }
+    //     }
+    //     return jsonObject.toJSONString();
+    // }
+
     public static String getJsonString(int code, String msg) {
         return getJsonString(code, msg, null);
     }
