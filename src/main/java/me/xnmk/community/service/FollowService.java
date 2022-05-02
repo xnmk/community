@@ -1,5 +1,9 @@
 package me.xnmk.community.service;
 
+import me.xnmk.community.vo.FollowVo;
+
+import java.util.List;
+
 /**
  * @author:xnmk_zhan
  * @create:2022-05-02 17:00
@@ -52,4 +56,24 @@ public interface FollowService {
      * @return boolean
      */
     boolean hasFollowed(int userId, int entityType, int entityId);
+
+    /**
+     * 查询某用户关注的人
+     *
+     * @param userId 用户id
+     * @param offset 起始索引
+     * @param limit  每页的数量
+     * @return List<FollowVo>
+     */
+    List<FollowVo> findFollowees(int userId, int offset, int limit);
+
+    /**
+     * 查询某用户粉丝
+     *
+     * @param userId 用户id
+     * @param offset 起始索引
+     * @param limit  每页的数量
+     * @return List<FollowVo>
+     */
+    List<FollowVo> findFollowers(int userId, int offset, int limit);
 }
