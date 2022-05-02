@@ -8,7 +8,8 @@ package me.xnmk.community.enumeration;
 public enum EntityTypes {
 
     ENTITY_TYPE_POST(1, "帖子"),
-    ENTITY_TYPE_COMMENT(2, "评论");
+    ENTITY_TYPE_COMMENT(2, "评论"),
+    ENTITY_TYPE_USER(3, "用户");
 
     private int code;
     private String msg;

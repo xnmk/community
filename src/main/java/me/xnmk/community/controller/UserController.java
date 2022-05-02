@@ -2,6 +2,8 @@ package me.xnmk.community.controller;
 
 import me.xnmk.community.annotation.LoginRequired;
 import me.xnmk.community.entity.User;
+import me.xnmk.community.enumeration.EntityTypes;
+import me.xnmk.community.service.FollowService;
 import me.xnmk.community.service.LikeService;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
@@ -39,6 +41,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private FollowService followService;
     @Autowired
     private UserThreadLocal userThreadLocal;
 
@@ -139,7 +143,6 @@ public class UserController {
      * @param model            模板
      * @return 重定向 or ModelAndView
      */
-    // @LoginRequired
     @PostMapping("/password/modify")
     public String modifyPassword(@CookieValue("ticket") String ticket, String originalPassword, String newPassword, Model model) {
         Map<String, Object> map = userService.modifyPassword(originalPassword, newPassword);
@@ -158,8 +161,16 @@ public class UserController {
         }
     }
 
+    /**
+     * 用户主页
+     *
+     * @param userId 用户id
+     * @param model 模板
+     * @return ModelAndView
+     */
     @GetMapping("/profile/{userId}")
     public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        User loginUser = userThreadLocal.getUser();
         User user = userService.findUserById(userId);
         if (user == null) {
             throw new RuntimeException("该用户不存在");
@@ -169,6 +180,18 @@ public class UserController {
         // 点赞数量
         int likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount", likeCount);
+        // 关注数量
+        long followeeCount = followService.findFolloweeCount(userId, EntityTypes.ENTITY_TYPE_USER.getCode());
+        model.addAttribute("followeeCount", followeeCount);
+        // 粉丝数量
+        long followerCount = followService.findFollowerCount(EntityTypes.ENTITY_TYPE_USER.getCode(), userId);
+        model.addAttribute("followerCount", followerCount);
+        // 是否已关注
+        boolean hasFollowed = false;
+        if (loginUser != null) {
+            hasFollowed = followService.hasFollowed(loginUser.getId(), EntityTypes.ENTITY_TYPE_USER.getCode(), userId);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
 
         return "/site/profile";
     }
