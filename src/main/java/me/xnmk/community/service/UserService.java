@@ -91,4 +91,27 @@ public interface UserService {
      * @return 提示信息
      */
     Map<String, Object> resetPassword(String email, String password);
+
+    /**
+     * 获得缓存用户信息
+     *
+     * @param userId 用户id
+     * @return me.xnmk.community.entity.User
+     */
+    User getUserCache(int userId);
+
+    /**
+     * 更新缓存用户信息
+     *
+     * @param userId 用户id
+     * @return me.xnmk.community.entity.User
+     */
+    User initUserCache(int userId);
+
+    /**
+     * 清除缓存
+     *
+     * @param userId 用户id
+     */
+    void clearUserCache(int userId);
 }

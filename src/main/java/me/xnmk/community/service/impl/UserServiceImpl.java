@@ -12,10 +12,12 @@ import me.xnmk.community.enumeration.UserStatus;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.MailClient;
+import me.xnmk.community.util.RedisKeyUtil;
 import me.xnmk.community.util.UserThreadLocal;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -24,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author:xnmk_zhan
@@ -35,8 +38,10 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private UserMapper userMapper;
+    // @Autowired
+    // private LoginTicketMapper loginTicketMapper;
     @Autowired
-    private LoginTicketMapper loginTicketMapper;
+    private RedisTemplate redisTemplate;
     @Autowired
     private MailClient mailClient;
     @Autowired
@@ -51,7 +56,11 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User findUserById(int id) {
-        return userMapper.selectById(id);
+        User user = getUserCache(id);
+        if (user == null) {
+            user = initUserCache(id);
+        }
+        return user;
     }
 
     @Override
@@ -127,6 +136,7 @@ public class UserServiceImpl implements UserService{
         if (user.getActivationCode().equals(code)){
             user.setStatus(1);
             userMapper.updateById(user);
+            clearUserCache(userId);
             return ActivationStates.ACTIVATION_SUCCESS.getCode();
         }else {
             return ActivationStates.ACTIVATION_SUCCESS.getCode();
@@ -174,7 +184,9 @@ public class UserServiceImpl implements UserService{
         loginTicket.setTicket(CommunityUtil.generateUUID());
         loginTicket.setStatus(TicketStatus.TICKET_VALID.getCode());
         loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSecond * 1000));
-        loginTicketMapper.insert(loginTicket);
+        // loginTicketMapper.insert(loginTicket);
+        String ticketKey = RedisKeyUtil.getTicketKey(loginTicket.getTicket());
+        redisTemplate.opsForValue().set(ticketKey, loginTicket);
 
         // 返回登录凭证给用户
         map.put("ticket",loginTicket.getTicket());
@@ -183,15 +195,20 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void logout(String ticket) {
-        loginTicketMapper.updateStatus(ticket, TicketStatus.TICKET_INVALID.getCode());
+        // loginTicketMapper.updateStatus(ticket, TicketStatus.TICKET_INVALID.getCode());
+        String ticketKey = RedisKeyUtil.getTicketKey(ticket);
+        LoginTicket loginTicket = (LoginTicket) redisTemplate.opsForValue().get(ticketKey);
+        loginTicket.setStatus(1);
+        redisTemplate.opsForValue().set(ticketKey, loginTicket);
     }
 
     @Override
     public LoginTicket findLoginTicket(String ticket) {
-        LambdaQueryWrapper<LoginTicket> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(LoginTicket::getTicket, ticket);
-        LoginTicket loginTicket = loginTicketMapper.selectOne(queryWrapper);
-        return loginTicket;
+        // LambdaQueryWrapper<LoginTicket> queryWrapper = new LambdaQueryWrapper<>();
+        // queryWrapper.eq(LoginTicket::getTicket, ticket);
+        // LoginTicket loginTicket = loginTicketMapper.selectOne(queryWrapper);
+        String ticketKey = RedisKeyUtil.getTicketKey(ticket);
+        return (LoginTicket) redisTemplate.opsForValue().get(ticketKey);
     }
 
     @Override
@@ -199,7 +216,9 @@ public class UserServiceImpl implements UserService{
         User user = new User();
         user.setHeaderUrl(headerUrl);
         user.setId(userId);
-        return userMapper.updateById(user);
+        int rows = userMapper.updateById(user);
+        clearUserCache(userId);
+        return rows;
     }
 
     @Override
@@ -226,6 +245,7 @@ public class UserServiceImpl implements UserService{
             // 正确：更改密码
             newPassword = CommunityUtil.md5(newPassword + user.getSalt());
             userMapper.updatePasswordById(newPassword, user.getId());
+            clearUserCache(user.getId());
             return map;
         }
     }
@@ -255,8 +275,28 @@ public class UserServiceImpl implements UserService{
         // 重置密码
         password = CommunityUtil.md5(password + user.getSalt());
         userMapper.updatePasswordById(password, user.getId());
+        clearUserCache(user.getId());
         map.put("user", user);
 
         return map;
+    }
+
+    public User getUserCache(int userId) {
+        String userKey = RedisKeyUtil.getUserKey(userId);
+        return (User) redisTemplate.opsForValue().get(userKey);
+    }
+
+    @Override
+    public User initUserCache(int userId) {
+        User user = userMapper.selectById(userId);
+        String userKey = RedisKeyUtil.getUserKey(userId);
+        redisTemplate.opsForValue().set(userKey, user, 3600, TimeUnit.SECONDS);
+        return user;
+    }
+
+    @Override
+    public void clearUserCache(int userId) {
+        String userKey = RedisKeyUtil.getUserKey(userId);
+        redisTemplate.delete(userKey);
     }
 }

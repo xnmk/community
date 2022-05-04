@@ -16,6 +16,12 @@ public class RedisKeyUtil {
     private static final String PREFIX_FOLLOWEE = "followee";
     // 粉丝
     private static final String PREFIX_FOLLOWER = "follower";
+    // 验证码
+    private static final String PREFIX_KAPTCHA = "kaptcha";
+    // 登录凭证
+    private static final String PREFIX_TICKET = "ticket";
+    // 用户信息
+    private static final String PREFIX_USER = "user";
 
     // 某个实体的赞：like:entity:<entityType>:<entityId> -> set(userId)
     public static String getEntityLikeKey(int entityType, int entityId) {
@@ -35,5 +41,20 @@ public class RedisKeyUtil {
     // 某个用户拥有的粉丝：follower:<entityType>:<entityId> -> zset(userId, now)
     public static String getFollowerKey(int entityType, int entityId) {
         return PREFIX_FOLLOWER + SPLIT + entityType + SPLIT + entityId;
+    }
+
+    // 登录验证码：kaptcha:<owner> -> string(kaptchaText)
+    public static String getKaptchaKey(String owner) {
+        return PREFIX_KAPTCHA + SPLIT + owner;
+    }
+
+    // 登录凭证：ticket:<ticket> -> string(LoginTicket)
+    public static String getTicketKey(String ticket) {
+        return PREFIX_TICKET + SPLIT + ticket;
+    }
+
+    // 用户：user:<userId> ->
+    public static String getUserKey(int userId) {
+        return PREFIX_USER + SPLIT + userId;
     }
 }

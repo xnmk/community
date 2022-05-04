@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
  */
 @Mapper
 @Component
+@Deprecated
 public interface LoginTicketMapper extends BaseMapper<LoginTicket> {
 
     /**
