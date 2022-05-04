@@ -5,6 +5,8 @@ import me.xnmk.community.entity.Comment;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author:xnmk_zhan
  * @create:2022-04-22 21:21
@@ -15,4 +17,6 @@ import org.springframework.stereotype.Component;
 public interface CommentMapper extends BaseMapper<Comment> {
 
     int selectCountByEntity(int entityType, int entityId);
+
+    int selectCountByUserId(int userId);
 }

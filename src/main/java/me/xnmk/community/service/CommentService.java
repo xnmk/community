@@ -1,7 +1,9 @@
 package me.xnmk.community.service;
 
 import me.xnmk.community.entity.Comment;
+import me.xnmk.community.entity.User;
 import me.xnmk.community.vo.CommentVo;
+import me.xnmk.community.vo.UserCommentVo;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,4 +54,20 @@ public interface CommentService {
      * @return int
      */
     int addComment(Comment comment);
+
+    /**
+     * 查找用户的所有评论（非回复）数量
+     *
+     * @param userId 用户id
+     * @return int
+     */
+    int findCommentCountByUser(int userId);
+
+    /**
+     * 查找用户的所有评论（非回复）
+     *
+     * @param userId 用户id
+     * @return List<CommentVo>
+     */
+    List<UserCommentVo> findUserCommentsByUser(int userId, PageParams pageParams);
 }

@@ -4,13 +4,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import me.xnmk.community.dao.DiscussPostMapper;
 import me.xnmk.community.entity.DiscussPost;
+import me.xnmk.community.enumeration.EntityTypes;
 import me.xnmk.community.service.DiscussPostService;
+import me.xnmk.community.service.LikeService;
 import me.xnmk.community.util.SensitiveFilter;
+import me.xnmk.community.vo.DiscussPostVo;
 import me.xnmk.community.vo.param.PageParams;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,10 +29,12 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Autowired
     private DiscussPostMapper discussPostMapper;
     @Autowired
+    private LikeService likeService;
+    @Autowired
     private SensitiveFilter sensitiveFilter;
 
     @Override
-    public List<DiscussPost> findDiscussPosts(int userId, PageParams pageParams) {
+    public List<DiscussPostVo> findDiscussPosts(int userId, PageParams pageParams, boolean addLikeCount) {
         // 分页
         Page<DiscussPost> page = new Page<>(pageParams.getCurrent(), pageParams.getLimit());
         LambdaQueryWrapper<DiscussPost> queryWrapper = new LambdaQueryWrapper();
@@ -41,7 +48,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         queryWrapper.orderByDesc(DiscussPost::getType, DiscussPost::getCreateTime);
         discussPostMapper.selectPage(page, queryWrapper);
 
-        return page.getRecords();
+        return copyList(page.getRecords(), addLikeCount);
     }
 
     @Override
@@ -65,12 +72,34 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     }
 
     @Override
-    public DiscussPost findDiscussPostById(int id) {
-        return discussPostMapper.selectById(id);
+    public DiscussPostVo findDiscussPostById(int id) {
+        return copy(discussPostMapper.selectById(id), false);
     }
 
     @Override
     public int updateCommentCount(int discussPostId, int commentCount) {
         return discussPostMapper.updateCommentCount(discussPostId, commentCount);
+    }
+
+    // addLikeCount：是否添加点赞数量
+    public List<DiscussPostVo> copyList(List<DiscussPost> discussPostList, boolean addLikeCount) {
+        List<DiscussPostVo> discussPostVoList = new ArrayList<>();
+        for (DiscussPost discussPost : discussPostList) {
+            DiscussPostVo discussPostVo = copy(discussPost, addLikeCount);
+            discussPostVoList.add(discussPostVo);
+        }
+        return discussPostVoList;
+    }
+
+    // addLikeCount：是否添加点赞数量
+    public DiscussPostVo copy(DiscussPost discussPost, boolean addLikeCount) {
+        DiscussPostVo discussPostVo = new DiscussPostVo();
+        BeanUtils.copyProperties(discussPost, discussPostVo);
+        // 添加点赞数量
+        if (addLikeCount) {
+            long likeCount = likeService.findEntityLikeCount(EntityTypes.ENTITY_TYPE_POST.getCode(), discussPost.getId());
+            discussPostVo.setLikeCount(likeCount);
+        }
+        return discussPostVo;
     }
 }

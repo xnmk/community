@@ -16,6 +16,8 @@ import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.SensitiveFilter;
 import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.CommentVo;
+import me.xnmk.community.vo.DiscussPostVo;
+import me.xnmk.community.vo.UserCommentVo;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,6 +107,24 @@ public class CommentServiceImpl implements CommentService {
         return rows;
     }
 
+    @Override
+    public int findCommentCountByUser(int userId) {
+        return commentMapper.selectCountByUserId(userId);
+    }
+
+    @Override
+    public List<UserCommentVo> findUserCommentsByUser(int userId, PageParams pageParams) {
+        Page<Comment> page = new Page<>(pageParams.getCurrent(), pageParams.getLimit());
+        LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.ne(Comment::getStatus, 1);
+        queryWrapper.eq(Comment::getUserId, userId);
+        queryWrapper.eq(Comment::getEntityType, EntityTypes.ENTITY_TYPE_POST.getCode());
+        queryWrapper.exists("select id from discuss_post where id = comment.entity_id and status != 2");
+        queryWrapper.orderByDesc(Comment::getCreateTime);
+        commentMapper.selectPage(page, queryWrapper);
+        return copyToUserCommentVoList(page.getRecords());
+    }
+
     private List<CommentVo> copyList(List<Comment> commentList) {
         List<CommentVo> commentVoList = new ArrayList<>();
         for (Comment comment : commentList) {
@@ -157,5 +177,21 @@ public class CommentServiceImpl implements CommentService {
         commentVo.setReplyCount(replyCount);
 
         return commentVo;
+    }
+
+    private List<UserCommentVo> copyToUserCommentVoList(List<Comment> commentList) {
+        List<UserCommentVo> userCommentVoList = new ArrayList<>();
+        for (Comment comment : commentList) {
+            userCommentVoList.add(copyToUserCommentVo(comment));
+        }
+        return userCommentVoList;
+    }
+
+    private UserCommentVo copyToUserCommentVo(Comment comment) {
+        UserCommentVo userCommentVo = new UserCommentVo();
+        BeanUtils.copyProperties(comment, userCommentVo);
+        DiscussPostVo discussPostVo = discussPostService.findDiscussPostById(comment.getEntityId());
+        userCommentVo.setDiscussPostVo(discussPostVo);
+        return userCommentVo;
     }
 }

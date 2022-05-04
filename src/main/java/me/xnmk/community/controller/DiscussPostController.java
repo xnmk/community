@@ -12,6 +12,7 @@ import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.CommentVo;
+import me.xnmk.community.vo.DiscussPostVo;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -75,7 +76,7 @@ public class DiscussPostController {
     public String getDiscussPost(@PathVariable("discussPostId") int discussPortId, Model model, PageParams pageParams) {
         User user = userThreadLocal.getUser();
         // 帖子
-        DiscussPost discussPost = discussPostService.findDiscussPostById(discussPortId);
+        DiscussPostVo discussPost = discussPostService.findDiscussPostById(discussPortId);
         model.addAttribute("post", discussPost);
         // 作者
         User author = userService.findUserById(discussPost.getUserId());

@@ -3,11 +3,12 @@ package me.xnmk.community.controller;
 import me.xnmk.community.annotation.LoginRequired;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.EntityTypes;
-import me.xnmk.community.service.FollowService;
-import me.xnmk.community.service.LikeService;
-import me.xnmk.community.service.UserService;
+import me.xnmk.community.service.*;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.UserThreadLocal;
+import me.xnmk.community.vo.DiscussPostVo;
+import me.xnmk.community.vo.UserCommentVo;
+import me.xnmk.community.vo.param.PageParams;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,6 +45,10 @@ public class UserController {
     private LikeService likeService;
     @Autowired
     private FollowService followService;
+    @Autowired
+    private CommentService commentService;
+    @Autowired
+    private DiscussPostService discussPostService;
     @Autowired
     private UserThreadLocal userThreadLocal;
 
@@ -165,7 +171,7 @@ public class UserController {
      * 用户主页
      *
      * @param userId 用户id
-     * @param model 模板
+     * @param model  模板
      * @return ModelAndView
      */
     @GetMapping("/profile/{userId}")
@@ -194,5 +200,53 @@ public class UserController {
         model.addAttribute("hasFollowed", hasFollowed);
 
         return "/site/profile";
+    }
+
+    /**
+     * 我的帖子列表
+     *
+     * @param userId     用户id
+     * @param pageParams 分页参数
+     * @param model      模板
+     * @return ModelAndView
+     */
+    @GetMapping("/mypost/{userId}")
+    public String getMyPost(@PathVariable("userId") int userId, PageParams pageParams, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) throw new RuntimeException("该用户不存在！");
+        // 用户
+        model.addAttribute("user", user);
+        // 分页设置
+        pageParams.setPath("/user/mypost/" + userId);
+        pageParams.setRows(discussPostService.findDiscussPortRows(userId));
+        // 帖子信息
+        List<DiscussPostVo> discussPostVoList = discussPostService.findDiscussPosts(userId, pageParams, true);
+        model.addAttribute("discussPosts", discussPostVoList);
+
+        return "/site/my-post";
+    }
+
+    /**
+     * 我的回复列表
+     *
+     * @param userId     用户id
+     * @param pageParams 分页参数
+     * @param model      模板
+     * @return ModelAndView
+     */
+    @GetMapping("/myreply/{userId}")
+    public String getMyReply(@PathVariable("userId") int userId, PageParams pageParams, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) throw new RuntimeException("该用户不存在！");
+        // 用户
+        model.addAttribute("user", user);
+        // 分页设置
+        pageParams.setPath("/user/myreply/" + userId);
+        pageParams.setRows(commentService.findCommentCountByUser(userId));
+        // 回复列表
+        List<UserCommentVo> userCommentVoList = commentService.findUserCommentsByUser(userId, pageParams);
+        model.addAttribute("comments", userCommentVoList);
+
+        return "/site/my-reply";
     }
 }

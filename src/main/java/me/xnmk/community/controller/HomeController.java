@@ -7,6 +7,7 @@ import me.xnmk.community.enumeration.EntityTypes;
 import me.xnmk.community.service.DiscussPostService;
 import me.xnmk.community.service.LikeService;
 import me.xnmk.community.service.UserService;
+import me.xnmk.community.vo.DiscussPostVo;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -48,11 +49,11 @@ public class HomeController {
         pageParams.setRows(discussPostService.findDiscussPortRows(0));
         pageParams.setPath("/index");
 
-        List<DiscussPost> discussPostList = discussPostService.findDiscussPosts(0, pageParams);
+        List<DiscussPostVo> discussPostList = discussPostService.findDiscussPosts(0, pageParams, false);
         // 存放用户及帖子信息
         List<Map<String, Object>> discussPosts = new ArrayList<>();
         if (discussPostList != null) {
-            for (DiscussPost discussPost : discussPostList) {
+            for (DiscussPostVo discussPost : discussPostList) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("post", discussPost);
                 User user = userService.findUserById(discussPost.getUserId());
