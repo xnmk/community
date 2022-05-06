@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author:xnmk_zhan
  * @create:2022-04-17 15:06
- * @Description: LoginTicketMapper
+ * @Description: LoginTicketMapper（已弃用）
  */
 @Mapper
 @Component

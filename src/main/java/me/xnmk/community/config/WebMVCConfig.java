@@ -1,7 +1,9 @@
 package me.xnmk.community.config;
 
+import me.xnmk.community.entity.Message;
 import me.xnmk.community.handler.LoginRequiredInterceptor;
 import me.xnmk.community.handler.LoginTicketInterceptor;
+import me.xnmk.community.handler.MessageInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -13,12 +15,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @Description: MVC配置
  */
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
+public class WebMVCConfig implements WebMvcConfigurer {
 
     @Autowired
     private LoginTicketInterceptor loginTicketInterceptor;
     @Autowired
     private LoginRequiredInterceptor loginRequiredInterceptor;
+    @Autowired
+    private MessageInterceptor messageInterceptor;
 
 
     @Override
@@ -30,6 +34,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         // 登录拦截器：拦截所有路径
         registry.addInterceptor(loginRequiredInterceptor)
+                // 排除静态资源
+                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
+
+        // 消息拦截器：拦截所有路径
+        registry.addInterceptor(messageInterceptor)
                 // 排除静态资源
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
     }

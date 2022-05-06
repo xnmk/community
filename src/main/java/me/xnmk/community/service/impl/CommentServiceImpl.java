@@ -53,6 +53,11 @@ public class CommentServiceImpl implements CommentService {
     private UserThreadLocal userThreadLocal;
 
     @Override
+    public Comment findCommentById(int commentId) {
+        return commentMapper.selectById(commentId);
+    }
+
+    @Override
     public List<Comment> findCommentsByEntity(int entityType, int entityId, PageParams pageParams) {
         Page<Comment> page = new Page<>(pageParams.getCurrent(), pageParams.getLimit());
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();

@@ -2,6 +2,7 @@ package me.xnmk.community.service;
 
 import me.xnmk.community.entity.Message;
 import me.xnmk.community.vo.MessageVo;
+import me.xnmk.community.vo.SystemMessageVo;
 import me.xnmk.community.vo.param.PageParams;
 
 import java.util.List;
@@ -79,4 +80,34 @@ public interface MessageService {
      * @return int
      */
     int deleteMessage(int MessageId);
+
+    /**
+     * 查询某个主题下的最新系统消息
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return me.xnmk.community.entity.Message
+     */
+    SystemMessageVo findLatestNotice(int userId, String topic);
+
+    int findNoticeCount(int userId, String topic);
+
+    /**
+     * 返回未读的系统消息数量（可设置主题）
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return int
+     */
+    int findNoticeUnreadCount(int userId, String topic);
+
+    /**
+     * 返回系统消息详情列表
+     *
+     * @param userId 用户id
+     * @param topic 主题
+     * @param pageParams 分页参数
+     * @return List<SystemMessageVo>
+     */
+    List<SystemMessageVo> findNotices(int userId, String topic, PageParams pageParams);
 }

@@ -59,4 +59,31 @@ public interface MessageMapper extends BaseMapper<Message> {
      * @return int
      */
     int updateStatus(List<Integer> ids, int status);
+
+    /**
+     * 查询某个主题下的最新消息
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return me.xnmk.community.entity.Message
+     */
+    Message selectLatestNotice(int userId, String topic);
+
+    /**
+     * 查询某个主题所包含的通知数量
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return int
+     */
+    int selectNoticeCount(int userId, String topic);
+
+    /**
+     * 查询未读的通知数量（可以携带主题）
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return int
+     */
+    int selectNoticeUnreadCount(int userId, String topic);
 }

@@ -2,6 +2,7 @@ package me.xnmk.community.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import me.xnmk.community.entity.Comment;
+import me.xnmk.community.entity.Message;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 

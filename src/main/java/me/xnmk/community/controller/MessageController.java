@@ -2,12 +2,14 @@ package me.xnmk.community.controller;
 
 import me.xnmk.community.entity.Message;
 import me.xnmk.community.entity.User;
+import me.xnmk.community.enumeration.CommunityConstant;
 import me.xnmk.community.enumeration.MessageStatus;
 import me.xnmk.community.service.MessageService;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.MessageVo;
+import me.xnmk.community.vo.SystemMessageVo;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,7 +28,7 @@ import java.util.List;
  * @Description: Message接口
  */
 @Controller
-public class MessageController {
+public class MessageController implements CommunityConstant {
 
     @Autowired
     private MessageService messageService;
@@ -52,9 +54,11 @@ public class MessageController {
         // 会话列表
         List<MessageVo> conversationList = messageService.findConversations(user.getId(), pageParams);
         model.addAttribute("conversations", conversationList);
-        // 查询未读消息数量
+        // 查询未读私信、系统通知数量
         int letterUnreadCount = messageService.findLetterUnreadCount(user.getId(), null);
         model.addAttribute("letterUnreadCount", letterUnreadCount);
+        int noticeUnreadCount = messageService.findNoticeUnreadCount(user.getId(), null);
+        model.addAttribute("noticeUnreadCount", noticeUnreadCount);
 
         return "/site/letter";
     }
@@ -143,5 +147,55 @@ public class MessageController {
     public String deleteLetter(int id) {
         messageService.deleteMessage(id);
         return CommunityUtil.getJsonString(0);
+    }
+
+    /**
+     * 系统消息列表
+     *
+     * @param model 模板
+     * @return ModelAndView
+     */
+    @GetMapping("/notice/list")
+    public String getNoticeList(Model model) {
+        User user = userThreadLocal.getUser();
+        // 评论类通知
+        SystemMessageVo systemMessageVo = messageService.findLatestNotice(user.getId(), TOPIC_COMMENT);
+        model.addAttribute("commentNotice", systemMessageVo);
+        // 点赞类通知
+        systemMessageVo = messageService.findLatestNotice(user.getId(), TOPIC_LIKE);
+        model.addAttribute("likeNotice", systemMessageVo);
+        // 关注类通知
+        systemMessageVo = messageService.findLatestNotice(user.getId(), TOPIC_FOLLOW);
+        model.addAttribute("followNotice", systemMessageVo);
+        // 所有未读私信、系统通知数量
+        int letterUnreadCount = messageService.findLetterUnreadCount(user.getId(), null);
+        model.addAttribute("letterUnreadCount", letterUnreadCount);
+        int noticeUnreadCount = messageService.findNoticeUnreadCount(user.getId(), null);
+        model.addAttribute("noticeUnreadCount", noticeUnreadCount);
+
+        return "/site/notice";
+    }
+    @GetMapping("/notice/detail/{topic}")
+    public String getNoticeDetail(@PathVariable("topic") String topic, PageParams pageParams, Model model) {
+        User user = userThreadLocal.getUser();
+        // 设置分页参数
+        pageParams.setLimit(5);
+        pageParams.setPath("/notice/detail/" + topic);
+        pageParams.setRows(messageService.findNoticeCount(user.getId(), topic));
+        // 查询
+        List<SystemMessageVo> notices = messageService.findNotices(user.getId(), topic, pageParams);
+        model.addAttribute("notices", notices);
+        // 设置消息已读
+        List<Integer> idList = new ArrayList<>();
+        if (notices != null) {
+            for (SystemMessageVo notice : notices) {
+                if (user.getId() == notice.getToId() && notice.getStatus() == MessageStatus.MESSAGE_UNREAD.getCode()) {
+                    idList.add(notice.getId());
+                }
+            }
+        }
+        if (!idList.isEmpty()) messageService.readMessage(idList);
+
+        return "/site/notice-detail";
     }
 }

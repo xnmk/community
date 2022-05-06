@@ -1,7 +1,10 @@
 package me.xnmk.community.controller;
 
+import me.xnmk.community.entity.Event;
 import me.xnmk.community.entity.User;
+import me.xnmk.community.enumeration.CommunityConstant;
 import me.xnmk.community.enumeration.EntityTypes;
+import me.xnmk.community.event.EventProducer;
 import me.xnmk.community.service.FollowService;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.UserThreadLocal;
@@ -24,7 +27,7 @@ import java.util.List;
  * @Description: 关注接口
  */
 @Controller
-public class FollowController {
+public class FollowController implements CommunityConstant {
 
     @Autowired
     private FollowService followService;
@@ -32,6 +35,8 @@ public class FollowController {
     private UserService userService;
     @Autowired
     private UserThreadLocal userThreadLocal;
+    @Autowired
+    private EventProducer eventProducer;
 
     /**
      * 关注
@@ -45,6 +50,16 @@ public class FollowController {
     public Result follow(int entityType, int entityId) {
         User user = userThreadLocal.getUser();
         followService.follow(user.getId(), entityType, entityId);
+
+        // 触发关注事件
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(user.getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
+
         return Result.success("已关注！", null);
     }
 

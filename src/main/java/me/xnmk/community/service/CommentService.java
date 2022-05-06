@@ -19,6 +19,13 @@ import java.util.List;
 public interface CommentService {
 
     /**
+     * 根据id查找评论
+     * @param commentId 评论id
+     * @return me.xnmk.community.entity.Comment
+     */
+    Comment findCommentById(int commentId);
+
+    /**
      * 查找评论（分页）
      *
      * @param entityType 评论实体类型

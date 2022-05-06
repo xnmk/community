@@ -32,8 +32,12 @@ public class ServiceLogAspect {
     @Before("pointcut()")
     public void before(JoinPoint joinPoint){
         // 格式：[用户]，在[时间]，访问了[me.xnmk.community.service.impl.*.*()].
-        // 获得request
+        // 获得 request
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        // 消息队列内消费者也可能要调用 service 层，则它的 attribute 为空
+        if (attributes == null) {
+            return;
+        }
         HttpServletRequest request = attributes.getRequest();
         // 获得ip
         String ip = request.getRemoteHost();

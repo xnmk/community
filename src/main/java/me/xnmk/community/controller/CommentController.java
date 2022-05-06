@@ -1,8 +1,14 @@
 package me.xnmk.community.controller;
 
 import me.xnmk.community.entity.Comment;
+import me.xnmk.community.entity.Event;
+import me.xnmk.community.enumeration.CommunityConstant;
+import me.xnmk.community.enumeration.EntityTypes;
+import me.xnmk.community.event.EventProducer;
 import me.xnmk.community.service.CommentService;
+import me.xnmk.community.service.DiscussPostService;
 import me.xnmk.community.util.UserThreadLocal;
+import me.xnmk.community.vo.DiscussPostVo;
 import me.xnmk.community.vo.param.CommentParams;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +25,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping("/comment")
-public class CommentController {
+public class CommentController implements CommunityConstant {
 
     @Autowired
     private CommentService commentService;
     @Autowired
+    private DiscussPostService discussPostService;
+    @Autowired
     private UserThreadLocal userThreadLocal;
+    @Autowired
+    private EventProducer eventProducer;
 
     /**
      * 添加评论
@@ -40,8 +50,26 @@ public class CommentController {
         BeanUtils.copyProperties(commentParams, comment);
         comment.setUserId(userThreadLocal.getUser().getId());
         comment.setStatus(0);
-
         commentService.addComment(comment);
+
+        // 触发评论事件
+        Event event = new Event()
+                .setTopic(TOPIC_COMMENT)
+                .setUserId(userThreadLocal.getUser().getId())
+                .setEntityType(comment.getEntityType())
+                .setEntityId(comment.getEntityId())
+                .setData("postId", discussPostId);
+        if (comment.getEntityType() == EntityTypes.ENTITY_TYPE_POST.getCode()) {
+            // 评论实体为帖子
+            DiscussPostVo target = discussPostService.findDiscussPostById(comment.getEntityId());
+            event.setEntityUserId(target.getUserId());
+        } else if (comment.getEntityType() == EntityTypes.ENTITY_TYPE_COMMENT.getCode()) {
+            // 评论实体为评论
+            Comment target = commentService.findCommentById(comment.getEntityId());
+            event.setEntityUserId(target.getUserId());
+        }
+        eventProducer.fireEvent(event);
+
         return "redirect:/discuss/detail/" + discussPostId;
     }
 }
