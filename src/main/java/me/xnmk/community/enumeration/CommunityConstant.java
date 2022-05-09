@@ -20,6 +20,10 @@ public interface CommunityConstant {
      */
     String TOPIC_FOLLOW = "follow";
     /**
+     * 事件主题：发布
+     */
+    String TOPIC_PUBLISH = "public";
+    /**
      * 系统用户id
      */
     int SYSTEM_USER_ID = 1;

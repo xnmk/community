@@ -2,6 +2,7 @@ package me.xnmk.community.vo;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import me.xnmk.community.entity.User;
 
 import java.util.Date;
 
@@ -23,6 +24,8 @@ public class DiscussPostVo {
     private double score;
     // 点赞数量
     private long likeCount;
+    // 帖子作者
+    private User user;
 
     public int getId() {
         return id;
@@ -102,5 +105,13 @@ public class DiscussPostVo {
 
     public void setLikeCount(long likeCount) {
         this.likeCount = likeCount;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

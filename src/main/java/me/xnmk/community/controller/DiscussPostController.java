@@ -2,13 +2,13 @@ package me.xnmk.community.controller;
 
 import me.xnmk.community.entity.Comment;
 import me.xnmk.community.entity.DiscussPost;
+import me.xnmk.community.entity.Event;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.CommentTypes;
+import me.xnmk.community.enumeration.CommunityConstant;
 import me.xnmk.community.enumeration.EntityTypes;
-import me.xnmk.community.service.CommentService;
-import me.xnmk.community.service.DiscussPostService;
-import me.xnmk.community.service.LikeService;
-import me.xnmk.community.service.UserService;
+import me.xnmk.community.event.EventProducer;
+import me.xnmk.community.service.*;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.CommentVo;
@@ -28,7 +28,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/discuss")
-public class DiscussPostController {
+public class DiscussPostController implements CommunityConstant {
 
     @Autowired
     private DiscussPostService discussPostService;
@@ -38,6 +38,8 @@ public class DiscussPostController {
     private CommentService commentService;
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private EventProducer eventProducer;
     @Autowired
     private UserThreadLocal userThreadLocal;
 
@@ -60,6 +62,14 @@ public class DiscussPostController {
         discussPost.setTitle(title);
         discussPost.setContent(content);
         discussPostService.addDiscussPost(discussPost);
+
+        // 触发发帖事件：存入 es
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityId(discussPost.getId())
+                .setEntityType(EntityTypes.ENTITY_TYPE_POST.getCode());
+        eventProducer.fireEvent(event);
 
         return CommunityUtil.getJsonString(200, "发布成功！");
     }
