@@ -76,4 +76,14 @@ public class HomeController {
     public String getErrorPage() {
         return "/error/500";
     }
+
+    /**
+     * 跳转无权限提示页面
+     *
+     * @return  ModelAndView
+     */
+    @GetMapping("/denied")
+    public String getDeniedPage() {
+        return "/error/404";
+    }
 }

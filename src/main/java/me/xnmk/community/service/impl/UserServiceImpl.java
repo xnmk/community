@@ -8,6 +8,7 @@ import me.xnmk.community.entity.LoginTicket;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.ActivationStates;
 import me.xnmk.community.enumeration.TicketStatus;
+import me.xnmk.community.enumeration.UserPermissions;
 import me.xnmk.community.enumeration.UserStatus;
 import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CommunityUtil;
@@ -18,14 +19,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -298,5 +297,25 @@ public class UserServiceImpl implements UserService{
     public void clearUserCache(int userId) {
         String userKey = RedisKeyUtil.getUserKey(userId);
         redisTemplate.delete(userKey);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities(int userId) {
+        User user = findUserById(userId);
+        List<GrantedAuthority> list = new ArrayList<>();
+        list.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                switch (user.getType()) {
+                    case 1:
+                        return UserPermissions.AUTHORITY_ADMIN.getCode();
+                    case 2:
+                        return UserPermissions.AUTHORITY_MODERATOR.getCode();
+                    default:
+                        return UserPermissions.AUTHORITY_USER.getCode();
+                }
+            }
+        });
+        return list;
     }
 }

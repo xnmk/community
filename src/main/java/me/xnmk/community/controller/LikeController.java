@@ -35,7 +35,7 @@ public class LikeController implements CommunityConstant {
      * @param entityId 点赞目标实体id
      * @param entityUserId 点赞目标实体所属用户id
      * @param postId 点赞发生的帖子id
-     * @return
+     * @return Result
      */
     @PostMapping("/like")
     @ResponseBody

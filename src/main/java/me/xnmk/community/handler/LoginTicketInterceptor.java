@@ -6,6 +6,10 @@ import me.xnmk.community.service.UserService;
 import me.xnmk.community.util.CookieUtil;
 import me.xnmk.community.util.UserThreadLocal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -29,7 +33,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 从cookie获取凭证
+        // 从 cookie 获取凭证
         String ticket = CookieUtil.getValue(request, "ticket");
         if (ticket != null){
             // 查询凭证信息
@@ -40,6 +44,11 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
                 User user = userService.findUserById(loginTicket.getUserId());
                 // 在本次请求持有用户
                 userThreadLocal.setUser(user);
+                // 构造用户认证结果，并存入 SecurityContext，以便于 SpringSecurity 进行授权
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        user, user.getPassword(), userService.getAuthorities(user.getId())
+                );
+                SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
             }
         }
         return true;
@@ -47,7 +56,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        // 获得用户信息存入ModelAndView
+        // 获得用户信息存入 ModelAndView
         User user = userThreadLocal.getUser();
         if (user != null && modelAndView != null){
             modelAndView.addObject("loginUser", user);
@@ -56,7 +65,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // 清理userThreadLocal
+        // 清理 userThreadLocal
         userThreadLocal.clear();
     }
 }

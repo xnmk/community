@@ -2,7 +2,9 @@ package me.xnmk.community.service;
 
 import me.xnmk.community.entity.LoginTicket;
 import me.xnmk.community.entity.User;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Collection;
 import java.util.Map;
 
 public interface UserService {
@@ -114,4 +116,12 @@ public interface UserService {
      * @param userId 用户id
      */
     void clearUserCache(int userId);
+
+    /**
+     * 获得用户权限
+     *
+     * @param userId 用户id
+     * @return Collection<? extends GrantedAuthority>
+     */
+    Collection<? extends GrantedAuthority> getAuthorities(int userId);
 }

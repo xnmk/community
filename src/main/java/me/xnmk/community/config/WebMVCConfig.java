@@ -32,10 +32,10 @@ public class WebMVCConfig implements WebMvcConfigurer {
                 // 排除静态资源
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
 
-        // 登录拦截器：拦截所有路径
-        registry.addInterceptor(loginRequiredInterceptor)
-                // 排除静态资源
-                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
+        // // 登录拦截器：拦截所有路径
+        // registry.addInterceptor(loginRequiredInterceptor)
+        //         // 排除静态资源
+        //         .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
 
         // 消息拦截器：拦截所有路径
         registry.addInterceptor(messageInterceptor)

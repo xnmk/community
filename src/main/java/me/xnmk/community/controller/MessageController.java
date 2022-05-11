@@ -175,6 +175,15 @@ public class MessageController implements CommunityConstant {
 
         return "/site/notice";
     }
+
+    /**
+     * 系统消息列表详情
+     *
+     * @param topic      主题
+     * @param pageParams 分页参数
+     * @param model      模板
+     * @return ModelAndView
+     */
     @GetMapping("/notice/detail/{topic}")
     public String getNoticeDetail(@PathVariable("topic") String topic, PageParams pageParams, Model model) {
         User user = userThreadLocal.getUser();

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -136,7 +137,6 @@ public class LoginController {
      * 生成验证码
      *
      * @param response 响应
-     * @param session  会话
      */
     @GetMapping("/kaptcha")
     public void getKaptcha(HttpServletResponse response/*, HttpSession session*/) {
@@ -174,7 +174,6 @@ public class LoginController {
      * @param code     验证码
      * @param remember 记住我
      * @param model    模板
-     * @param session  会话
      * @param response 响应
      * @return ModelAndView
      */
@@ -225,6 +224,7 @@ public class LoginController {
     @GetMapping("/logout")
     public String logout(@CookieValue("ticket") String ticket) {
         userService.logout(ticket);
+        SecurityContextHolder.clearContext();
         return "redirect:/login";
     }
 
