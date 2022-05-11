@@ -22,7 +22,11 @@ public interface CommunityConstant {
     /**
      * 事件主题：发布
      */
-    String TOPIC_PUBLISH = "public";
+    String TOPIC_PUBLISH = "publish";
+    /**
+     * 事件主题：删帖
+     */
+    String TOPIC_DELETE = "delete";
     /**
      * 系统用户id
      */

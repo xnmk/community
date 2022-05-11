@@ -1,3 +1,9 @@
+$(function () {
+    $("#topBtn").click(setTop);
+    $("#EssenceBtn").click(setEssence);
+    $("#DeleteBtn").click(setDelete);
+});
+
 function like(btn, entityType, entityId, entityUserId, postId) {
     $.post(
         CONTEXT_PATH + "/like",
@@ -10,6 +16,61 @@ function like(btn, entityType, entityId, entityUserId, postId) {
             if (data.code == 200) {
                 $(btn).children("i").text(data.data.likeCount);
                 $(btn).children("b").text(data.data.likeStatus == 1 ? "已赞" : "赞");
+            } else {
+                alert(data.msg);
+            }
+        }
+    )
+}
+
+// 置顶
+function setTop() {
+    $.post(
+        CONTEXT_PATH + "/discuss/top",
+        {"id":$("#postId").val()},
+        function (data) {
+            if (!isJson(data)) {
+                data = $.parseJSON(data);
+            }
+            if (data.code == 200) {
+                $("#topBtn").attr("disabled", "disabled");
+            } else {
+                alert(data.msg);
+            }
+        }
+    )
+}
+
+// 加精
+function setEssence() {
+    $.post(
+        CONTEXT_PATH + "/discuss/essence",
+        {"id": $("#postId").val()},
+        function (data) {
+            if (!isJson(data)) {
+                data = $.parseJSON(data);
+            }
+            if (data.code == 200) {
+                $("#EssenceBtn").attr("disabled", "disabled");
+            } else {
+                alert(data.msg);
+            }
+        }
+    )
+}
+
+// 删除
+function setDelete() {
+    $.post(
+        CONTEXT_PATH + "/discuss/delete",
+        {"id": $("#postId").val()},
+        function (data) {
+            if (!isJson(data)) {
+                data = $.parseJSON(data);
+            }
+            if (data.code == 200) {
+                // $("#DeleteBtn").attr("disabled", "disabled");
+                location.href = CONTEXT_PATH + "/index";
             } else {
                 alert(data.msg);
             }

@@ -81,6 +81,16 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         return discussPostMapper.updateCommentCount(discussPostId, commentCount);
     }
 
+    @Override
+    public int updateType(int id, int type) {
+        return discussPostMapper.updateType(id, type);
+    }
+
+    @Override
+    public int updateStatus(int id, int status) {
+        return discussPostMapper.updateStatus(id, status);
+    }
+
     // addLikeCount：是否添加点赞数量
     public List<DiscussPostVo> copyList(List<DiscussPost> discussPostList, boolean addLikeCount) {
         List<DiscussPostVo> discussPostVoList = new ArrayList<>();

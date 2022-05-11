@@ -58,6 +58,19 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                         UserPermissions.AUTHORITY_ADMIN.getCode(),
                         UserPermissions.AUTHORITY_MODERATOR.getCode()
                 )
+                .antMatchers(
+                        "/discuss/top",
+                        "/discuss/essence"
+                )
+                .hasAnyAuthority(
+                        UserPermissions.AUTHORITY_ADMIN.getCode(),
+                        UserPermissions.AUTHORITY_MODERATOR.getCode()
+                )
+                .antMatchers(
+                        "/discuss/delete"
+                ).hasAnyAuthority(
+                        UserPermissions.AUTHORITY_ADMIN.getCode()
+                )
                 .anyRequest().permitAll()
                 // 禁用 csrf
                 .and().csrf().disable();

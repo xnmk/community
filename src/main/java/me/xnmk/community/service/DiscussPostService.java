@@ -50,4 +50,22 @@ public interface DiscussPostService {
      * @return int 是否添加成功
      */
     int updateCommentCount(int discussPostId, int commentCount);
+
+    /**
+     * 修改帖子是否置顶
+     *
+     * @param id   帖子id
+     * @param type 置顶状态
+     * @return int
+     */
+    int updateType(int id, int type);
+
+    /**
+     * 修改帖子状态
+     *
+     * @param id     帖子id
+     * @param status 帖子状态
+     * @return int
+     */
+    int updateStatus(int id, int status);
 }

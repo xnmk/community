@@ -6,6 +6,7 @@ import me.xnmk.community.entity.Event;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.CommentTypes;
 import me.xnmk.community.enumeration.CommunityConstant;
+import me.xnmk.community.enumeration.DiscussStatus;
 import me.xnmk.community.enumeration.EntityTypes;
 import me.xnmk.community.event.EventProducer;
 import me.xnmk.community.service.*;
@@ -13,6 +14,7 @@ import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.CommentVo;
 import me.xnmk.community.vo.DiscussPostVo;
+import me.xnmk.community.vo.Result;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -109,5 +111,72 @@ public class DiscussPostController implements CommunityConstant {
         return "/site/discuss-detail";
     }
 
+    /**
+     * 置顶
+     *
+     * @param id 帖子id
+     * @return Result
+     */
+    @PostMapping("/top")
+    @ResponseBody
+    public Result setTop(int id) {
+        User user = userThreadLocal.getUser();
+        discussPostService.updateType(id, DiscussStatus.DISCUSS_TYPES_TOP.getCode());
 
+        // 触发发帖事件：存入 es
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityId(id)
+                .setEntityType(EntityTypes.ENTITY_TYPE_POST.getCode());
+        eventProducer.fireEvent(event);
+
+        return Result.success(200);
+    }
+
+    /**
+     * 加精
+     *
+     * @param id 帖子id
+     * @return Result
+     */
+    @PostMapping("/essence")
+    @ResponseBody
+    public Result setEssence(int id) {
+        User user = userThreadLocal.getUser();
+        discussPostService.updateStatus(id, DiscussStatus.DISCUSS_STATUS_ESSENCE.getCode());
+
+        // 触发发帖事件：存入 es
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityId(id)
+                .setEntityType(EntityTypes.ENTITY_TYPE_POST.getCode());
+        eventProducer.fireEvent(event);
+
+        return Result.success(200);
+    }
+
+    /**
+     * 拉黑
+     *
+     * @param id 帖子id
+     * @return Result
+     */
+    @PostMapping("/delete")
+    @ResponseBody
+    public Result setDelete(int id) {
+        User user = userThreadLocal.getUser();
+        discussPostService.updateStatus(id, DiscussStatus.DISCUSS_STATUS_DELETE.getCode());
+
+        // 触发删帖事件：存入 es
+        Event event = new Event()
+                .setTopic(TOPIC_DELETE)
+                .setUserId(user.getId())
+                .setEntityId(id)
+                .setEntityType(EntityTypes.ENTITY_TYPE_POST.getCode());
+        eventProducer.fireEvent(event);
+
+        return Result.success(200);
+    }
 }
