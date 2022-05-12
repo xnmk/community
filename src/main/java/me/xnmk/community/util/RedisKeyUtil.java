@@ -1,5 +1,7 @@
 package me.xnmk.community.util;
 
+import java.util.Date;
+
 /**
  * @author:xnmk_zhan
  * @create:2022-04-28 09:44
@@ -7,6 +9,7 @@ package me.xnmk.community.util;
  */
 public class RedisKeyUtil {
 
+    // 分隔符
     private static final String SPLIT = ":";
     // 点赞数量（帖子、评论、回复）
     private static final String PREFIX_ENTITY_LIKE = "like:entity";
@@ -22,6 +25,10 @@ public class RedisKeyUtil {
     private static final String PREFIX_TICKET = "ticket";
     // 用户信息
     private static final String PREFIX_USER = "user";
+    // 独立访客
+    private static final String PREFIX_UV = "uv";
+    // 活跃用户
+    private static final String PREFIX_DAU = "dau";
 
     // 某个实体的赞：like:entity:<entityType>:<entityId> -> set(userId)
     public static String getEntityLikeKey(int entityType, int entityId) {
@@ -56,5 +63,25 @@ public class RedisKeyUtil {
     // 用户：user:<userId> ->
     public static String getUserKey(int userId) {
         return PREFIX_USER + SPLIT + userId;
+    }
+
+    // 单日 UV
+    public static String getUVKey(String date) {
+        return PREFIX_UV + SPLIT + date;
+    }
+
+    // 区间 UV
+    public static String getUVKey(String startDate, String endDate) {
+        return PREFIX_UV + SPLIT + startDate + SPLIT + endDate;
+    }
+
+    // 单日 DAU
+    public static String getDAUKey(String date) {
+        return PREFIX_UV + SPLIT + date;
+    }
+
+    // 区间 DAU
+    public static String getDAUKey(String startDate, String endDate) {
+        return PREFIX_UV + SPLIT + startDate + SPLIT + endDate;
     }
 }

@@ -67,7 +67,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                         UserPermissions.AUTHORITY_MODERATOR.getCode()
                 )
                 .antMatchers(
-                        "/discuss/delete"
+                        "/discuss/delete",
+                        "/data/**"
                 ).hasAnyAuthority(
                         UserPermissions.AUTHORITY_ADMIN.getCode()
                 )
