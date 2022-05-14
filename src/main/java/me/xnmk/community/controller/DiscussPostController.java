@@ -11,12 +11,14 @@ import me.xnmk.community.enumeration.EntityTypes;
 import me.xnmk.community.event.EventProducer;
 import me.xnmk.community.service.*;
 import me.xnmk.community.util.CommunityUtil;
+import me.xnmk.community.util.RedisKeyUtil;
 import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.CommentVo;
 import me.xnmk.community.vo.DiscussPostVo;
 import me.xnmk.community.vo.Result;
 import me.xnmk.community.vo.param.PageParams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +46,8 @@ public class DiscussPostController implements CommunityConstant {
     private EventProducer eventProducer;
     @Autowired
     private UserThreadLocal userThreadLocal;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 添加帖子
@@ -72,6 +76,10 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityId(discussPost.getId())
                 .setEntityType(EntityTypes.ENTITY_TYPE_POST.getCode());
         eventProducer.fireEvent(event);
+
+        // 计算帖子分数
+        String redisKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(redisKey, discussPost.getId());
 
         return CommunityUtil.getJsonString(200, "发布成功！");
     }
@@ -153,6 +161,10 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityId(id)
                 .setEntityType(EntityTypes.ENTITY_TYPE_POST.getCode());
         eventProducer.fireEvent(event);
+
+        // 计算帖子分数
+        String redisKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(redisKey, id);
 
         return Result.success(200);
     }

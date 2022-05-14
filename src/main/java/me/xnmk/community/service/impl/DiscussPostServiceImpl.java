@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import me.xnmk.community.dao.DiscussPostMapper;
 import me.xnmk.community.entity.DiscussPost;
 import me.xnmk.community.enumeration.EntityTypes;
+import me.xnmk.community.enumeration.OrderModes;
 import me.xnmk.community.service.DiscussPostService;
 import me.xnmk.community.service.LikeService;
 import me.xnmk.community.util.SensitiveFilter;
@@ -34,18 +35,23 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     private SensitiveFilter sensitiveFilter;
 
     @Override
-    public List<DiscussPostVo> findDiscussPosts(int userId, PageParams pageParams, boolean addLikeCount) {
+    public List<DiscussPostVo> findDiscussPosts(int userId, PageParams pageParams, boolean addLikeCount, int orderModel) {
         // 分页
         Page<DiscussPost> page = new Page<>(pageParams.getCurrent(), pageParams.getLimit());
         LambdaQueryWrapper<DiscussPost> queryWrapper = new LambdaQueryWrapper();
         // 排除拉黑
         queryWrapper.ne(DiscussPost::getStatus, 2);
-        // 是否根据userId查询
+        // 是否根据 userId 查询
         if (userId != 0) {
             queryWrapper.eq(DiscussPost::getUserId, userId);
         }
-        // 排序（置顶、创建时间）
-        queryWrapper.orderByDesc(DiscussPost::getType, DiscussPost::getCreateTime);
+        // 根据不同模式排序（最新、最热）
+        if (orderModel == OrderModes.POST_ORDER_MODE_NEW.getCode()) {
+            queryWrapper.orderByDesc(DiscussPost::getType, DiscussPost::getCreateTime);
+        }
+        if (orderModel == OrderModes.POST_ORDER_MODE_HOT.getCode()) {
+            queryWrapper.orderByDesc(DiscussPost::getType, DiscussPost::getScore, DiscussPost::getCreateTime);
+        }
         discussPostMapper.selectPage(page, queryWrapper);
 
         return copyList(page.getRecords(), addLikeCount);
@@ -89,6 +95,11 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Override
     public int updateStatus(int id, int status) {
         return discussPostMapper.updateStatus(id, status);
+    }
+
+    @Override
+    public int updateScore(int id, double score) {
+        return discussPostMapper.updateScore(id, score);
     }
 
     // addLikeCount：是否添加点赞数量

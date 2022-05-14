@@ -3,6 +3,7 @@ package me.xnmk.community.controller;
 import me.xnmk.community.annotation.LoginRequired;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.EntityTypes;
+import me.xnmk.community.enumeration.OrderModes;
 import me.xnmk.community.service.*;
 import me.xnmk.community.util.CommunityUtil;
 import me.xnmk.community.util.UserThreadLocal;
@@ -220,7 +221,7 @@ public class UserController {
         pageParams.setPath("/user/mypost/" + userId);
         pageParams.setRows(discussPostService.findDiscussPortRows(userId));
         // 帖子信息
-        List<DiscussPostVo> discussPostVoList = discussPostService.findDiscussPosts(userId, pageParams, true);
+        List<DiscussPostVo> discussPostVoList = discussPostService.findDiscussPosts(userId, pageParams, true, OrderModes.POST_ORDER_MODE_NEW.getCode());
         model.addAttribute("discussPosts", discussPostVoList);
 
         return "/site/my-post";

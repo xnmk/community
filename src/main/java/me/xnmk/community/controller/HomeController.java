@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,13 +44,14 @@ public class HomeController {
      * @return ModelAndView
      */
     @GetMapping("/index")
-    public String getIndexPage(Model model, PageParams pageParams) {
+    public String getIndexPage(Model model, PageParams pageParams,
+                               @RequestParam(name = "orderMode", defaultValue = "0") int orderMode) {
         // SpringMVC会自动实例化Model和PageParams，并将pageParams注入Model.
         // 所以，在thymeleaf种可以直接访问PageParams对象种的数据
         pageParams.setRows(discussPostService.findDiscussPortRows(0));
-        pageParams.setPath("/index");
+        pageParams.setPath("/index?orderMode=" + orderMode);
 
-        List<DiscussPostVo> discussPostList = discussPostService.findDiscussPosts(0, pageParams, false);
+        List<DiscussPostVo> discussPostList = discussPostService.findDiscussPosts(0, pageParams, false, orderMode);
         // 存放用户及帖子信息
         List<Map<String, Object>> discussPosts = new ArrayList<>();
         if (discussPostList != null) {
@@ -64,6 +66,8 @@ public class HomeController {
             }
         }
         model.addAttribute("discussPosts", discussPosts);
+        model.addAttribute("orderMode", orderMode);
+
         return "/index";
     }
 

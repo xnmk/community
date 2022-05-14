@@ -23,6 +23,7 @@ spring:
       minimum-idle: 5
       # 多久关闭一个空闲连接
       idle-timeout: 30000
+
   mail:
     host: smtp.sina.com
     port: 465
@@ -57,6 +58,33 @@ spring:
       client:
         reactive:
           endpoints: localhost:9200
+
+  task:
+    execution:
+      pool:
+        max-size: 15
+        core-size: 5
+        queue-capacity: 100
+    scheduling:
+      pool:
+        size: 5
+
+  # quartz
+  quartz:
+    job-store-type: jdbc
+    scheduler-name: communityScheduler
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+          jobStore:
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            isClustered: true
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 5
 
 mybatis-plus:
   configuration:

@@ -3,12 +3,15 @@ package me.xnmk.community.controller;
 import me.xnmk.community.entity.Event;
 import me.xnmk.community.entity.User;
 import me.xnmk.community.enumeration.CommunityConstant;
+import me.xnmk.community.enumeration.EntityTypes;
 import me.xnmk.community.event.EventProducer;
 import me.xnmk.community.service.LikeService;
+import me.xnmk.community.util.RedisKeyUtil;
 import me.xnmk.community.util.UserThreadLocal;
 import me.xnmk.community.vo.LikeVo;
 import me.xnmk.community.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -27,6 +30,8 @@ public class LikeController implements CommunityConstant {
     private UserThreadLocal userThreadLocal;
     @Autowired
     private EventProducer eventProducer;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 点赞
@@ -55,7 +60,7 @@ public class LikeController implements CommunityConstant {
         likeVo.setLikeCount(likeCount);
         likeVo.setLikeStatus(likeStatus);
 
-        // 触发点赞事件
+        // 触发事件：系统消息
         if (likeStatus == 1) {
             Event event = new Event()
                     .setTopic(TOPIC_LIKE)
@@ -65,6 +70,12 @@ public class LikeController implements CommunityConstant {
                     .setEntityUserId(entityUserId)
                     .setData("postId", postId);
             eventProducer.fireEvent(event);
+        }
+
+        if (entityType == EntityTypes.ENTITY_TYPE_POST.getCode()) {
+            // 计算帖子分数
+            String redisKey = RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(redisKey, postId);
         }
 
         return Result.success(likeVo);

@@ -14,9 +14,10 @@ public interface DiscussPostService {
      * @param userId       用户id
      * @param pageParams   分页参数
      * @param addLikeCount 是否在vo内添加点赞数量信息
+     * @param orderMode    排序模式
      * @return List<DiscussPost>
      */
-    List<DiscussPostVo> findDiscussPosts(int userId, PageParams pageParams, boolean addLikeCount);
+    List<DiscussPostVo> findDiscussPosts(int userId, PageParams pageParams, boolean addLikeCount, int orderMode);
 
     /**
      * 查找用户的帖子数量
@@ -68,4 +69,13 @@ public interface DiscussPostService {
      * @return int
      */
     int updateStatus(int id, int status);
+
+    /**
+     * 更新帖子分数
+     *
+     * @param id    帖子id
+     * @param score 帖子分数
+     * @return int
+     */
+    int updateScore(int id, double score);
 }
